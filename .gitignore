@@ -23,6 +23,9 @@ out/
 .DS_Store
 Thumbs.db
 
+# Playwright MCP
+.playwright-mcp/
+
 # Env
 .env
 .env.local
