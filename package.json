@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test": "playwright test tests/block5",
+    "test:ui": "playwright test tests/block5 --ui",
+    "test:archive": "playwright test archive"
   },
   "repository": {
     "type": "git",

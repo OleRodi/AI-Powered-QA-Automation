@@ -30,6 +30,35 @@ Use an existing record on `Programs` page:
   - Fields are pre-populated exactly with current values (`Name`, `Description`, `Program Code`, `Delivery Mode`, `Max Students`).  
 - **Priority:** High
 
+### TC-001b
+- **Title:** Edit form pre-populates every visible field, not just a known subset  
+- **Preconditions:**  
+  - User is logged in with edit permission  
+  - Program `Web Development 2026` exists with baseline data  
+- **Steps:**  
+  1. Navigate to `Programs` page.  
+  2. Click the edit icon for `Web Development 2026`.  
+  3. Count all visible form fields in the modal.  
+  4. Compare each field value to the corresponding value shown in the program list/detail view.  
+- **Expected Result:**  
+  - Every visible field in the edit form has a value that matches the program's current data.  
+  - No field is blank or shows a default/placeholder when the program already has a stored value.  
+- **Priority:** High
+
+### TC-001c
+- **Title:** Edit icon is visible and clickable for each program row  
+- **Preconditions:**  
+  - User is logged in with edit permission  
+  - At least two programs exist in the list  
+- **Steps:**  
+  1. Navigate to `Programs` page.  
+  2. For each program row, verify an edit icon is visible.  
+  3. Click the edit icon on the second program row.  
+- **Expected Result:**  
+  - Each row displays an edit icon.  
+  - Clicking the icon opens the edit modal for the correct program (not a different one).  
+- **Priority:** Medium
+
 ### TC-002
 - **Title:** Saving a valid updated Name closes modal and refreshes list immediately  
 - **Preconditions:**  
@@ -42,6 +71,19 @@ Use an existing record on `Programs` page:
   - Programs list updates immediately and displays `Web Development 2026 - Updated` without manual page refresh.  
   - No duplicate row is created.  
 - **Priority:** High
+
+### TC-002b
+- **Title:** List update after save occurs within an acceptable time threshold  
+- **Preconditions:**  
+  - Editing modal is open for `Web Development 2026`  
+- **Steps:**  
+  1. Change `Name` to `Web Development 2026 - Timed`.  
+  2. Click `Save` and start a timer.  
+  3. Observe how long until the updated name appears in the program list.  
+- **Expected Result:**  
+  - Modal closes and the list reflects the new name within 2 seconds of clicking Save.  
+  - No full-page reload is required.  
+- **Priority:** Medium
 
 ### TC-003
 - **Title:** Updating only Description preserves all other field values  
@@ -56,6 +98,36 @@ Use an existing record on `Programs` page:
   - Save succeeds and modal closes.  
   - `Description` shows updated value.  
   - `Name`, `Program Code`, `Delivery Mode`, and `Max Students` remain exactly unchanged.  
+- **Priority:** High
+
+### TC-003b
+- **Title:** Editing multiple fields simultaneously saves all changes correctly  
+- **Preconditions:**  
+  - Editing modal is open for `Web Development 2026` with baseline data  
+- **Steps:**  
+  1. Change `Name` to `Web Development 2026 - Multi`.  
+  2. Change `Description` to `Multi-field update test`.  
+  3. Change `Delivery Mode` to `Hybrid` (if editable).  
+  4. Click `Save`.  
+  5. Re-open the edit modal for the same program.  
+- **Expected Result:**  
+  - All three changed fields reflect their new values.  
+  - Fields not changed (`Program Code`, `Max Students`) retain original values.  
+  - No partial save (all-or-nothing).  
+- **Priority:** High
+
+### TC-003c
+- **Title:** Editing only Description verifies the new Description value is actually persisted  
+- **Preconditions:**  
+  - Editing modal is open for `Web Development 2026` with baseline data  
+- **Steps:**  
+  1. Change `Description` to `Verified persistence of description field`.  
+  2. Click `Save`.  
+  3. Refresh the browser.  
+  4. Re-open edit modal for the same program.  
+- **Expected Result:**  
+  - `Description` shows `Verified persistence of description field` after reload.  
+  - The value is not reverted or empty.  
 - **Priority:** High
 
 ### TC-004
@@ -84,7 +156,7 @@ Use an existing record on `Programs` page:
   2. Click `Save`.  
 - **Expected Result:**  
   - Save does not complete.  
-  - Validation message appears for `Name` (e.g., “Name is required”).  
+  - Validation message appears for `Name` (e.g., "Name is required").  
   - Modal remains open and no list update occurs.  
 - **Priority:** High
 
@@ -226,8 +298,17 @@ Use an existing record on `Programs` page:
 
 - Max length and allowed character set for `Name` and `Description` are not specified.
 - Uniqueness rule for `Name` is not explicitly stated (case-sensitive vs case-insensitive unknown).
-- Required vs optional status for `Description` and “other fields” is not defined.
+- Required vs optional status for `Description` and "other fields" is not defined.
 - Error handling expectations are missing (validation style, toast vs inline, API failure behavior).
 - Concurrency behavior (last-write-wins vs conflict message) is not defined.
-- “Immediately shows updated name” is not time-bounded (e.g., within 1s) and refresh mechanism is unspecified.
 - Save behavior when no fields are changed is not defined (allowed, disabled, or no-op).
+
+### Gaps addressed by added test cases
+
+| Gap | Addressed By |
+|---|---|
+| Pre-population only checked a hardcoded field subset | TC-001b — verifies every visible field dynamically |
+| Edit icon presence/correctness not tested | TC-001c — checks icon per row and correct program association |
+| "Immediately" had no timing assertion | TC-002b — asserts list update within 2 seconds |
+| Multi-field edits never tested | TC-003b — changes 3 fields at once, verifies all-or-nothing save |
+| Description save not explicitly verified after persist | TC-003c — changes Description, reloads page, re-checks value |
