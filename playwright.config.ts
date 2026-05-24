@@ -1,21 +1,23 @@
-import { defineConfig, devices } from "@playwright/test";
-import dotenv from "dotenv";
-
-dotenv.config();
+import 'dotenv/config';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: "./tests/block5",
-  timeout: 60000,
-  expect: { timeout: 10000 },
+  testDir: 'tests',
   fullyParallel: true,
-  workers: 2,
-  retries: 1,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  reporter: [
+    ['list'],
+    ['html', { open: process.env.CI ? 'never' : 'always' }],
+  ],
+
   use: {
     baseURL: process.env.DIDAXIS_URL,
-    headless: true,
-    screenshot: "only-on-failure",
-    trace: "retain-on-failure",
-    actionTimeout: 15000,
-    navigationTimeout: 30000,
+    trace: 'on',
+    headless: false,
+    launchOptions: {
+      slowMo: 1000,
+    },
   },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });
