@@ -1,6 +1,7 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from "../../fixtures/cleanup.fixture";
+import { createProgram } from "../../support/playwright-program-helpers";
 
-const PROGRAM_NAME = "Web Development 2026";
+const PROGRAM_NAME = "OleRodi Web Development 2026";
 
 async function login(page: Page) {
   await page.goto("/login");
@@ -13,16 +14,6 @@ async function login(page: Page) {
 async function goToPrograms(page: Page) {
   await page.getByRole("button", { name: "Programs" }).click();
   await page.waitForURL("**/programs");
-}
-
-async function createProgram(page: Page, name: string, description: string) {
-  await page.getByRole("button", { name: "+ New Program" }).click();
-  const createDialog = page.getByRole("dialog");
-  await createDialog.getByRole("textbox", { name: "Program Name" }).fill(name);
-  await createDialog.getByRole("textbox", { name: "Description" }).fill(description);
-  await createDialog.getByRole("button", { name: "Create" }).click();
-  await expect(createDialog).toBeHidden();
-  await expect(page.getByRole("row").filter({ hasText: name }).first()).toBeVisible();
 }
 
 async function openEditDialog(page: Page, programName: string) {
@@ -43,15 +34,13 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Programs – Edit existing program details (DS-2)", () => {
-  test("TC-001: Edit form opens with existing program data pre-populated", async ({
-    page,
-  }) => {
+  test("TC-001: Edit form opens with existing program data pre-populated", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const programDesc = "TC-001 baseline description";
 
     await goToPrograms(page);
-    await createProgram(page, programName, programDesc);
+    await createProgram(page, trackProgram, programName, programDesc);
 
     const editDialog = await openEditDialog(page, programName);
 
@@ -63,15 +52,13 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     );
   });
 
-  test("TC-002: Edit form pre-populates every visible field with current data", async ({
-    page,
-  }) => {
+  test("TC-002: Edit form pre-populates every visible field with current data", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const programDesc = "TC-002 full field baseline";
 
     await goToPrograms(page);
-    await createProgram(page, programName, programDesc);
+    await createProgram(page, trackProgram, programName, programDesc);
 
     const editDialog = await openEditDialog(page, programName);
 
@@ -101,16 +88,14 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     }
   });
 
-  test("TC-003: Edit icon is visible per row and opens the correct program", async ({
-    page,
-  }) => {
+  test("TC-003: Edit icon is visible per row and opens the correct program", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const firstName = `${PROGRAM_NAME} A ${suffix}`;
     const secondName = `${PROGRAM_NAME} B ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, firstName, "TC-003 first program");
-    await createProgram(page, secondName, "TC-003 second program");
+    await createProgram(page, trackProgram, firstName, "TC-003 first program");
+    await createProgram(page, trackProgram, secondName, "TC-003 second program");
 
     const rows = page.getByRole("row").filter({ has: page.getByRole("button", { name: "✏️" }) });
     await expect(rows.first().getByRole("button", { name: "✏️" })).toBeVisible();
@@ -129,15 +114,13 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     );
   });
 
-  test("TC-004: Saving a valid updated Name closes modal and refreshes list immediately", async ({
-    page,
-  }) => {
+  test("TC-004: Saving a valid updated Name closes modal and refreshes list immediately", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const originalName = `${PROGRAM_NAME} ${suffix}`;
     const updatedName = `${PROGRAM_NAME} ${suffix} - Updated`;
 
     await goToPrograms(page);
-    await createProgram(page, originalName, "TC-004 baseline");
+    await createProgram(page, trackProgram, originalName, "TC-004 baseline");
 
     const editDialog = await openEditDialog(page, originalName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -152,13 +135,13 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     ).toHaveCount(0);
   });
 
-  test("TC-005: List update after save occurs within 2 seconds", async ({ page }) => {
+  test("TC-005: List update after save occurs within 2 seconds", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const originalName = `${PROGRAM_NAME} ${suffix}`;
     const timedName = `${PROGRAM_NAME} ${suffix} - Timed`;
 
     await goToPrograms(page);
-    await createProgram(page, originalName, "TC-005 baseline");
+    await createProgram(page, trackProgram, originalName, "TC-005 baseline");
 
     const editDialog = await openEditDialog(page, originalName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -175,16 +158,14 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     expect(Date.now() - start).toBeLessThan(2000);
   });
 
-  test("TC-006: Updating only Description preserves all other field values", async ({
-    page,
-  }) => {
+  test("TC-006: Updating only Description preserves all other field values", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const originalDesc = "TC-006 baseline description";
     const updatedDesc = "Updated description for evening and weekend learners";
 
     await goToPrograms(page);
-    await createProgram(page, programName, originalDesc);
+    await createProgram(page, trackProgram, programName, originalDesc);
 
     let editDialog = await openEditDialog(page, programName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -207,9 +188,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     );
   });
 
-  test("TC-007: Editing multiple fields simultaneously saves all changes correctly", async ({
-    page,
-  }) => {
+  test("TC-007: Editing multiple fields simultaneously saves all changes correctly", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const originalName = `${PROGRAM_NAME} ${suffix}`;
     const updatedName = `${PROGRAM_NAME} ${suffix} - Multi`;
@@ -217,7 +196,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     const updatedDesc = "Multi-field update test";
 
     await goToPrograms(page);
-    await createProgram(page, originalName, originalDesc);
+    await createProgram(page, trackProgram, originalName, originalDesc);
 
     const editDialog = await openEditDialog(page, originalName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -237,13 +216,13 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(reopened.getByRole("textbox", { name: "Description" })).toHaveValue(updatedDesc);
   });
 
-  test("TC-008: Description change persists through browser reload", async ({ page }) => {
+  test("TC-008: Description change persists through browser reload", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const persistedDesc = "Verified persistence of description field";
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-008 baseline");
+    await createProgram(page, trackProgram, programName, "TC-008 baseline");
 
     const editDialog = await openEditDialog(page, programName);
     const descField = editDialog.getByRole("textbox", { name: "Description" });
@@ -261,14 +240,14 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     );
   });
 
-  test("TC-009: All persisted updates remain correct after page reload", async ({ page }) => {
+  test("TC-009: All persisted updates remain correct after page reload", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const originalName = `${PROGRAM_NAME} ${suffix}`;
     const updatedName = `${PROGRAM_NAME} ${suffix} - Updated`;
     const updatedDesc = "TC-009 persisted description";
 
     await goToPrograms(page);
-    await createProgram(page, originalName, "TC-009 baseline");
+    await createProgram(page, trackProgram, originalName, "TC-009 baseline");
 
     const editDialog = await openEditDialog(page, originalName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -292,12 +271,12 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(reopened.getByRole("textbox", { name: "Description" })).toHaveValue(updatedDesc);
   });
 
-  test("TC-010: Save is blocked when Name is empty", async ({ page }) => {
+  test("TC-010: Save is blocked when Name is empty", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-010 baseline");
+    await createProgram(page, trackProgram, programName, "TC-010 baseline");
 
     const editDialog = await openEditDialog(page, programName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -313,12 +292,12 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(page.getByRole("row").filter({ hasText: programName }).first()).toBeVisible();
   });
 
-  test("TC-011: Save is blocked when Name contains only whitespace", async ({ page }) => {
+  test("TC-011: Save is blocked when Name contains only whitespace", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-011 baseline");
+    await createProgram(page, trackProgram, programName, "TC-011 baseline");
 
     const editDialog = await openEditDialog(page, programName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -333,14 +312,14 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(page.getByRole("row").filter({ hasText: programName }).first()).toBeVisible();
   });
 
-  test("TC-012: Duplicate program name is rejected", async ({ page }) => {
+  test("TC-012: Duplicate program name is rejected", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const targetName = `${PROGRAM_NAME} ${suffix}`;
-    const duplicateName = `Data Science ${suffix}`;
+    const duplicateName = `OleRodi Data Science ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, duplicateName, "TC-012 duplicate target");
-    await createProgram(page, targetName, "TC-012 target program");
+    await createProgram(page, trackProgram, duplicateName, "TC-012 duplicate target");
+    await createProgram(page, trackProgram, targetName, "TC-012 target program");
 
     const editDialog = await openEditDialog(page, targetName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -353,14 +332,14 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(page.getByRole("row").filter({ hasText: duplicateName })).toHaveCount(1);
   });
 
-  test("TC-013: Backend failure does not close modal or corrupt list", async ({ page }) => {
+  test("TC-013: Backend failure does not close modal or corrupt list", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const originalDesc = "TC-013 baseline description";
     const attemptedDesc = "TC-013 attempted update during forced failure";
 
     await goToPrograms(page);
-    await createProgram(page, programName, originalDesc);
+    await createProgram(page, trackProgram, programName, originalDesc);
 
     const editDialog = await openEditDialog(page, programName);
     const descField = editDialog.getByRole("textbox", { name: "Description" });
@@ -393,14 +372,14 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     );
   });
 
-  test("TC-014: Cancel action discards all unsaved changes", async ({ page }) => {
+  test("TC-014: Cancel action discards all unsaved changes", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const originalDesc = "TC-014 baseline description";
     const draftName = `${PROGRAM_NAME} ${suffix} - Draft`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, originalDesc);
+    await createProgram(page, trackProgram, programName, originalDesc);
 
     const editDialog = await openEditDialog(page, programName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -426,15 +405,13 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     );
   });
 
-  test("TC-015: Name accepts valid special characters and saves correctly", async ({
-    page,
-  }) => {
+  test("TC-015: Name accepts valid special characters and saves correctly", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
-    const specialName = `Web Development 2026: Front-End & API (Evening) ${suffix}`;
+    const specialName = `OleRodi Web Development 2026: Front-End & API (Evening) ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-015 baseline");
+    await createProgram(page, trackProgram, programName, "TC-015 baseline");
 
     const editDialog = await openEditDialog(page, programName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -446,13 +423,13 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(page.getByRole("row").filter({ hasText: specialName })).toBeVisible();
   });
 
-  test("TC-016: Name at maximum allowed length is accepted", async ({ page }) => {
+  test("TC-016: Name at maximum allowed length is accepted", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
-    const maxLengthName = "A".repeat(100) + suffix;
+    const maxLengthName = `OleRodi ${"A".repeat(100)}${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-016 baseline");
+    await createProgram(page, trackProgram, programName, "TC-016 baseline");
 
     const editDialog = await openEditDialog(page, programName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -464,13 +441,13 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(page.getByRole("row").filter({ hasText: maxLengthName })).toBeVisible();
   });
 
-  test("TC-017: Name exceeding maximum length is prevented or rejected", async ({ page }) => {
+  test("TC-017: Name exceeding maximum length is prevented or rejected", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
-    const overMaxName = "B".repeat(101) + suffix;
+    const overMaxName = `OleRodi ${"B".repeat(101)}${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-017 baseline");
+    await createProgram(page, trackProgram, programName, "TC-017 baseline");
 
     const editDialog = await openEditDialog(page, programName);
     const nameField = editDialog.getByRole("textbox", { name: "Program Name" });
@@ -501,12 +478,12 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(page.getByRole("row").filter({ hasText: programName }).first()).toBeVisible();
   });
 
-  test("TC-018: Empty Description behavior is consistent", async ({ page }) => {
+  test("TC-018: Empty Description behavior is consistent", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-018 baseline description");
+    await createProgram(page, trackProgram, programName, "TC-018 baseline description");
 
     const editDialog = await openEditDialog(page, programName);
     const descField = editDialog.getByRole("textbox", { name: "Description" });
@@ -525,13 +502,13 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     }
   });
 
-  test("TC-019: Unchanged Save does not alter any data", async ({ page }) => {
+  test("TC-019: Unchanged Save does not alter any data", async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const programDesc = "TC-019 unchanged baseline";
 
     await goToPrograms(page);
-    await createProgram(page, programName, programDesc);
+    await createProgram(page, trackProgram, programName, programDesc);
 
     const editDialog = await openEditDialog(page, programName);
     await editDialog.getByRole("button", { name: "Save" }).click();
@@ -547,10 +524,10 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(page.getByRole("row").filter({ hasText: programName })).toHaveCount(1);
   });
 
-  test("TC-020: Concurrent edit conflict is handled safely", async ({ browser }) => {
+  test("TC-020: Concurrent edit conflict is handled safely", async ({ browser, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
-    const sessionAName = `Concurrent A ${suffix}`;
+    const sessionAName = `OleRodi Concurrent A ${suffix}`;
     const sessionBDesc = `Concurrent B ${suffix}`;
 
     const contextA = await browser.newContext({
@@ -567,7 +544,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await login(pageB);
 
     await goToPrograms(pageA);
-    await createProgram(pageA, programName, "TC-020 concurrent baseline");
+    await createProgram(pageA, trackProgram, programName, "TC-020 concurrent baseline");
 
     await goToPrograms(pageB);
     await pageB.reload();

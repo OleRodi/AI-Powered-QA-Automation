@@ -1,4 +1,8 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/cleanup.fixture";
+import {
+  clickCreateAndTrack,
+  trackProgramByName,
+} from "../../support/playwright-program-helpers";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/login");
@@ -9,11 +13,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Programs – DS-3 Program Name Validation – Positive Flows", () => {
-  test("TC-001: Program is created when name contains valid special characters", async ({
-    page,
-  }) => {
+  test("TC-001: Program is created when name contains valid special characters", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Informatique & IA - Niveau 2 ${suffix}`;
+    const programName = `OleRodi Informatique & IA - Niveau 2 ${suffix}`;
     const description = "TC-001 special characters test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -23,7 +25,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox", { name: "Program Name" }).fill(programName);
     await dialog.getByRole("textbox", { name: "Description" }).fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     const createdRow = page
@@ -41,11 +43,9 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     ).toHaveValue(programName);
   });
 
-  test("TC-002: Newly created program appears in the Programs list", async ({
-    page,
-  }) => {
+  test("TC-002: Newly created program appears in the Programs list", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Informatique Liste ${suffix}`;
+    const programName = `OleRodi Informatique Liste ${suffix}`;
     const description = "TC-002 list verification test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -55,7 +55,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox", { name: "Program Name" }).fill(programName);
     await dialog.getByRole("textbox", { name: "Description" }).fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await expect(page).toHaveURL(/\/programs/);
@@ -68,12 +68,10 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     await expect(createdRow.getByText(programName, { exact: true })).toBeVisible();
   });
 
-  test("TC-003: Leading and trailing spaces are trimmed and stored value is the trimmed version", async ({
-    page,
-  }) => {
+  test("TC-003: Leading and trailing spaces are trimmed and stored value is the trimmed version", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const paddedName = `   Cyber Security 2026 ${suffix}   `;
-    const trimmedName = `Cyber Security 2026 ${suffix}`;
+    const paddedName = `   OleRodi Cyber Security 2026 ${suffix}   `;
+    const trimmedName = `OleRodi Cyber Security 2026 ${suffix}`;
     const description = "TC-003 leading/trailing trim test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -83,7 +81,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox", { name: "Program Name" }).fill(paddedName);
     await dialog.getByRole("textbox", { name: "Description" }).fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     const createdRow = page
@@ -103,11 +101,9 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     expect(storedValue).toBe(trimmedName);
   });
 
-  test("TC-004: Accented characters are accepted and preserved", async ({
-    page,
-  }) => {
+  test("TC-004: Accented characters are accepted and preserved", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Ingénierie Logicielle ${suffix}`;
+    const programName = `OleRodi Ingénierie Logicielle ${suffix}`;
     const description = "TC-004 accented characters test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -117,7 +113,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox", { name: "Program Name" }).fill(programName);
     await dialog.getByRole("textbox", { name: "Description" }).fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     const createdRow = page
@@ -135,11 +131,9 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     ).toHaveValue(programName);
   });
 
-  test("TC-005: Form fields are cleared after successful creation", async ({
-    page,
-  }) => {
+  test("TC-005: Form fields are cleared after successful creation", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Cloud Engineering 2026 ${suffix}`;
+    const programName = `OleRodi Cloud Engineering 2026 ${suffix}`;
     const description = "TC-005 form reset test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -149,7 +143,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     let dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox", { name: "Program Name" }).fill(programName);
     await dialog.getByRole("textbox", { name: "Description" }).fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await expect(
@@ -168,9 +162,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
 });
 
 test.describe("Programs – DS-3 Program Name Validation – Negative Flows", () => {
-  test("TC-006: Form is blocked when Program Name contains only spaces", async ({
-    page,
-  }) => {
+  test("TC-006: Form is blocked when Program Name contains only spaces", async ({ page, trackProgram }) => {
     await page.getByRole("button", { name: "Programs" }).click();
     await page.waitForURL("**/programs");
 
@@ -188,9 +180,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await expect(dialog).toBeVisible();
   });
 
-  test("TC-007: Form is blocked when Program Name is empty", async ({
-    page,
-  }) => {
+  test("TC-007: Form is blocked when Program Name is empty", async ({ page, trackProgram }) => {
     await page.getByRole("button", { name: "Programs" }).click();
     await page.waitForURL("**/programs");
 
@@ -210,9 +200,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await expect(dialog).toBeVisible();
   });
 
-  test("TC-008: Form is blocked when Program Name contains only tabs and newlines", async ({
-    page,
-  }) => {
+  test("TC-008: Form is blocked when Program Name contains only tabs and newlines", async ({ page, trackProgram }) => {
     await page.getByRole("button", { name: "Programs" }).click();
     await page.waitForURL("**/programs");
 
@@ -230,11 +218,9 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await expect(dialog).toBeVisible();
   });
 
-  test("TC-009: Exact duplicate Program Name is rejected", async ({
-    page,
-  }) => {
+  test("TC-009: Exact duplicate Program Name is rejected", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Web Dev Dup ${suffix}`;
+    const programName = `OleRodi Web Dev Dup ${suffix}`;
     const description = "TC-009 duplicate test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -246,7 +232,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await dialog
       .getByRole("textbox", { name: "Description" })
       .fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await expect(
@@ -268,11 +254,9 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     ).toHaveCount(1);
   });
 
-  test("TC-010: Duplicate with only leading/trailing spaces is rejected", async ({
-    page,
-  }) => {
+  test("TC-010: Duplicate with only leading/trailing spaces is rejected", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Trim Dup ${suffix}`;
+    const programName = `OleRodi Trim Dup ${suffix}`;
     const paddedName = `  ${programName}  `;
     const description = "TC-010 padded duplicate test";
 
@@ -285,7 +269,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await dialog
       .getByRole("textbox", { name: "Description" })
       .fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await expect(
@@ -307,11 +291,9 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     ).toHaveCount(1);
   });
 
-  test("TC-011: Duplicate detected after same-session creation without page refresh", async ({
-    page,
-  }) => {
+  test("TC-011: Duplicate detected after same-session creation without page refresh", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Cloud Same Session ${suffix}`;
+    const programName = `OleRodi Cloud Same Session ${suffix}`;
     const description = "TC-011 same-session duplicate test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -323,7 +305,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await dialog
       .getByRole("textbox", { name: "Description" })
       .fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await expect(
@@ -345,12 +327,10 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     ).toHaveCount(1);
   });
 
-  test("TC-012: Case-variant duplicate behavior is consistent", async ({
-    page,
-  }) => {
+  test("TC-012: Case-variant duplicate behavior is consistent", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const originalName = `Case Variant Base ${suffix}`;
-    const lowercaseName = `case variant base ${suffix}`;
+    const originalName = `OleRodi Case Variant Base ${suffix}`;
+    const lowercaseName = `OleRodi case variant base ${suffix}`;
 
     await page.getByRole("button", { name: "Programs" }).click();
     await page.waitForURL("**/programs");
@@ -361,7 +341,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await dialog
       .getByRole("textbox", { name: "Description" })
       .fill("TC-012 original");
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await expect(
@@ -389,13 +369,14 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
 
       await expect(originalRow.first()).toBeVisible();
       await expect(lowercaseRow.first()).toBeVisible();
+      await trackProgramByName(trackProgram, lowercaseName);
     }
   });
 
-  test("TC-013: XSS/injection string is safely handled", async ({ page }) => {
+  test("TC-013: XSS/injection string is safely handled", async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const marker = `__xssExecuted_${suffix}`;
-    const payload = `<script>window.${marker}=true</script>`;
+    const payload = `OleRodi <script>window.${marker}=true</script>`;
     const description = "TC-013 XSS handling test";
 
     let alertSeen = false;
@@ -417,6 +398,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     if (!rejected) {
       await expect(dialog).toBeHidden();
       await expect(page.getByRole("row").filter({ hasText: payload }).first()).toBeVisible();
+      await trackProgramByName(trackProgram, payload);
     }
 
     const flagged = await page.evaluate((key) => {
@@ -426,11 +408,9 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     expect(alertSeen).toBe(false);
   });
 
-  test("TC-014: Create button is disabled during submission", async ({
-    page,
-  }) => {
+  test("TC-014: Create button is disabled during submission", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Submit State ${suffix}`;
+    const programName = `OleRodi Submit State ${suffix}`;
     const description = "TC-014 submission-state test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -452,9 +432,23 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     });
 
     const createButton = dialog.getByRole("button", { name: "Create" });
+    const responsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/programs") &&
+        response.request().method() === "POST" &&
+        response.status() >= 200 &&
+        response.status() < 300
+    );
     await createButton.click();
 
     const disabledWhilePending = await createButton.isDisabled();
+    const response = await responsePromise;
+    const body = (await response.json()) as { data?: { id?: string }; id?: string };
+    const programId = body.data?.id ?? body.id;
+    if (programId) {
+      trackProgram(programId);
+    }
+
     await page.unroute(/\/programs/i);
 
     expect(disabledWhilePending).toBe(true);
@@ -466,11 +460,9 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
 });
 
 test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => {
-  test("TC-015: Error messages appear in a consistent, visible location", async ({
-    page,
-  }) => {
+  test("TC-015: Error messages appear in a consistent, visible location", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const dupSeed = `Error Loc Dup ${suffix}`;
+    const dupSeed = `OleRodi Error Loc Dup ${suffix}`;
     const description = "TC-015 error-location test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -485,7 +477,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
 
     await dialog.getByRole("textbox", { name: "Program Name" }).clear();
     await dialog.getByRole("textbox", { name: "Program Name" }).fill(dupSeed);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await page.getByRole("button", { name: "+ New Program" }).click();
@@ -502,12 +494,10 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     ).toBeVisible();
   });
 
-  test("TC-016: Name at maximum allowed length is accepted", async ({
-    page,
-  }) => {
+  test("TC-016: Name at maximum allowed length is accepted", async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const maxLength = 255;
-    const base = `MaxLen ${suffix} `;
+    const base = `OleRodi MaxLen ${suffix} `;
     const atMaxName = base + "A".repeat(maxLength - base.length);
     const description = "TC-016 max length test";
 
@@ -518,7 +508,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox", { name: "Program Name" }).fill(atMaxName);
     await dialog.getByRole("textbox", { name: "Description" }).fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await expect(
@@ -538,11 +528,9 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     await editDialog.getByRole("button", { name: "Cancel" }).click();
   });
 
-  test("TC-017: Name exceeding maximum length is rejected", async ({
-    page,
-  }) => {
+  test("TC-017: Name exceeding maximum length is rejected", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const base = `OverMax ${suffix} `;
+    const base = `OleRodi OverMax ${suffix} `;
     const maxLength = 255;
     const overMaxName = base + "A".repeat(maxLength - base.length + 1);
     const description = "TC-017 over-max length test";
@@ -567,11 +555,9 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     }
   });
 
-  test("TC-018: Valid punctuation does not trigger false validation errors", async ({
-    page,
-  }) => {
+  test("TC-018: Valid punctuation does not trigger false validation errors", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `AI/ML: Foundations (2026) - Group A ${suffix}`;
+    const programName = `OleRodi AI/ML: Foundations (2026) - Group A ${suffix}`;
     const description = "TC-018 punctuation test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -581,7 +567,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox", { name: "Program Name" }).fill(programName);
     await dialog.getByRole("textbox", { name: "Description" }).fill(description);
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     const createdRow = page
@@ -599,11 +585,9 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     ).toHaveValue(programName);
   });
 
-  test("TC-019: Validation error preserves other field values", async ({
-    page,
-  }) => {
+  test("TC-019: Validation error preserves other field values", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const correctedName = `Business Analytics ${suffix}`;
+    const correctedName = `OleRodi Business Analytics ${suffix}`;
     const description = "TC-019 field-preservation test";
 
     await page.getByRole("button", { name: "Programs" }).click();
@@ -634,7 +618,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     ).toHaveValue(description);
 
     await expect(createButton).toBeEnabled();
-    await createButton.click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await expect(
@@ -642,12 +626,10 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     ).toBeVisible();
   });
 
-  test("TC-020: Internal multiple spaces behavior is consistent", async ({
-    page,
-  }) => {
+  test("TC-020: Internal multiple spaces behavior is consistent", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const canonical = `Web Development 2026 ${suffix}`;
-    const doubleSpaceVariant = `Web  Development  2026 ${suffix}`;
+    const canonical = `OleRodi Web Development 2026 ${suffix}`;
+    const doubleSpaceVariant = `OleRodi Web  Development  2026 ${suffix}`;
 
     await page.getByRole("button", { name: "Programs" }).click();
     await page.waitForURL("**/programs");
@@ -658,7 +640,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     await dialog
       .getByRole("textbox", { name: "Description" })
       .fill("TC-020 canonical");
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await clickCreateAndTrack(page, trackProgram, dialog);
     await expect(dialog).toBeHidden();
 
     await expect(
@@ -680,7 +662,10 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     if (dialogStillOpen) {
       expect(dialogStillOpen).toBe(true);
     } else {
-      await expect(page.getByRole("row").filter({ hasText: canonical }).first()).toBeVisible();
+      await expect(
+        page.getByRole("row").filter({ hasText: doubleSpaceVariant }).first()
+      ).toBeVisible();
+      await trackProgramByName(trackProgram, doubleSpaceVariant);
     }
   });
 });

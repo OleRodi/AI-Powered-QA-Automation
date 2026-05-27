@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/cleanup.fixture";
+import { createProgram } from "../../support/playwright-program-helpers";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/login");
@@ -7,18 +8,6 @@ test.beforeEach(async ({ page }) => {
   await page.getByRole("button", { name: "Sign In" }).click();
   await page.waitForURL("**/");
 });
-
-async function createProgram(page: import("@playwright/test").Page, name: string, description: string) {
-  await page.getByRole("button", { name: "+ New Program" }).click();
-  const dialog = page.getByRole("dialog");
-  await dialog.getByRole("textbox", { name: "Program Name" }).fill(name);
-  await dialog.getByRole("textbox", { name: "Description" }).fill(description);
-  await dialog.getByRole("button", { name: "Create" }).click();
-  await expect(dialog).toBeHidden();
-  await expect(
-    page.getByRole("row").filter({ hasText: name }).first()
-  ).toBeVisible();
-}
 
 async function goToPrograms(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Programs" }).click();
@@ -34,14 +23,12 @@ function dataRows(page: import("@playwright/test").Page) {
 }
 
 test.describe("Delete Program – Positive Flows", () => {
-  test("TC-001: Confirmation dialog appears before program deletion", async ({
-    page,
-  }) => {
+  test("TC-001: Confirmation dialog appears before program deletion", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "A program used for deletion testing");
+    await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
     let dialogMessage = "";
     let dialogFired = false;
@@ -62,14 +49,12 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(programRow(page, programName)).toBeVisible();
   });
 
-  test("TC-002: Program is removed from list after deletion is confirmed", async ({
-    page,
-  }) => {
+  test("TC-002: Program is removed from list after deletion is confirmed", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "A program used for deletion testing");
+    await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
     page.on("dialog", async (dialog) => {
       await dialog.accept();
@@ -82,14 +67,12 @@ test.describe("Delete Program – Positive Flows", () => {
     ).toHaveCount(0);
   });
 
-  test("TC-003: Program remains in list when deletion is canceled", async ({
-    page,
-  }) => {
+  test("TC-003: Program remains in list when deletion is canceled", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "A program used for deletion testing");
+    await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
     page.on("dialog", async (dialog) => {
       await dialog.dismiss();
@@ -102,14 +85,12 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(programRow(page, programName)).toBeVisible();
   });
 
-  test("TC-004: Confirmation dialog closes without side effects when dismissed via close control", async ({
-    page,
-  }) => {
+  test("TC-004: Confirmation dialog closes without side effects when dismissed via close control", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "A program used for deletion testing");
+    await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
     let dialogCount = 0;
 
@@ -127,16 +108,14 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(programRow(page, programName)).toBeVisible();
   });
 
-  test("TC-005: Delete icon is visible and functional for each program row", async ({
-    page,
-  }) => {
+  test("TC-005: Delete icon is visible and functional for each program row", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const testProgramName = `Test Program ${suffix}`;
-    const dataScienceName = `Data Science 2026 ${suffix}`;
+    const testProgramName = `OleRodi Test Program ${suffix}`;
+    const dataScienceName = `OleRodi Data Science 2026 ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, testProgramName, "TC-005 delete icon visibility test");
-    await createProgram(page, dataScienceName, "TC-005 secondary program");
+    await createProgram(page, trackProgram, testProgramName, "TC-005 delete icon visibility test");
+    await createProgram(page, trackProgram, dataScienceName, "TC-005 secondary program");
 
     const testRow = programRow(page, testProgramName);
     const dataScienceRow = programRow(page, dataScienceName);
@@ -162,14 +141,12 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(dataScienceRow).toBeVisible();
   });
 
-  test("TC-006: Confirmation dialog shows the correct program name", async ({
-    page,
-  }) => {
+  test("TC-006: Confirmation dialog shows the correct program name", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const cloudProgramName = `Cloud Engineering 2026 ${suffix}`;
+    const cloudProgramName = `OleRodi Cloud Engineering 2026 ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, cloudProgramName, "TC-006 dialog identity test");
+    await createProgram(page, trackProgram, cloudProgramName, "TC-006 dialog identity test");
 
     let dialogMessage = "";
 
@@ -188,14 +165,12 @@ test.describe("Delete Program – Positive Flows", () => {
 });
 
 test.describe("Delete Program – Negative Flows", () => {
-  test("TC-007: Program is not removed before user confirms", async ({
-    page,
-  }) => {
+  test("TC-007: Program is not removed before user confirms", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-007 no optimistic removal test");
+    await createProgram(page, trackProgram, programName, "TC-007 no optimistic removal test");
 
     let deleteRequested = false;
 
@@ -220,14 +195,12 @@ test.describe("Delete Program – Negative Flows", () => {
     await page.unroute(/\/programs/i);
   });
 
-  test("TC-008: Backend failure does not remove program from list", async ({
-    page,
-  }) => {
+  test("TC-008: Backend failure does not remove program from list", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-008 backend failure test");
+    await createProgram(page, trackProgram, programName, "TC-008 backend failure test");
 
     await page.route(/\/programs/i, async (route) => {
       if (route.request().method() === "DELETE") {
@@ -254,14 +227,12 @@ test.describe("Delete Program – Negative Flows", () => {
     await page.unroute(/\/programs/i);
   });
 
-  test("TC-009: Unauthorized user cannot delete a program", async ({
-    page,
-  }) => {
+  test("TC-009: Unauthorized user cannot delete a program", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-009 authorization test");
+    await createProgram(page, trackProgram, programName, "TC-009 authorization test");
 
     await page.route(/\/programs/i, async (route) => {
       if (route.request().method() === "DELETE") {
@@ -288,14 +259,12 @@ test.describe("Delete Program – Negative Flows", () => {
     await page.unroute(/\/programs/i);
   });
 
-  test("TC-010: Rapid double-click on Confirm sends only one delete request", async ({
-    page,
-  }) => {
+  test("TC-010: Rapid double-click on Confirm sends only one delete request", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-010 double click test");
+    await createProgram(page, trackProgram, programName, "TC-010 double click test");
 
     let deleteRequestCount = 0;
 
@@ -325,14 +294,12 @@ test.describe("Delete Program – Negative Flows", () => {
     await page.unroute(/\/programs/i);
   });
 
-  test("TC-011: Deletion is blocked for program with dependent records", async ({
-    page,
-  }) => {
+  test("TC-011: Deletion is blocked for program with dependent records", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-011 referential constraint test");
+    await createProgram(page, trackProgram, programName, "TC-011 referential constraint test");
 
     await page.route(/\/programs/i, async (route) => {
       if (route.request().method() === "DELETE") {
@@ -364,11 +331,9 @@ test.describe("Delete Program – Negative Flows", () => {
 });
 
 test.describe("Delete Program – Edge Cases", () => {
-  test("TC-012: Deleting the last remaining program triggers the empty state", async ({
-    page,
-  }) => {
+  test("TC-012: Deleting the last remaining program triggers the empty state", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
     const programId = `mock-id-${suffix}`;
 
     let programsData = [
@@ -427,18 +392,16 @@ test.describe("Delete Program – Edge Cases", () => {
     await page.unroute(/\/api\/programs/i);
   });
 
-  test("TC-013: Multiple sequential deletions are reflected immediately", async ({
-    page,
-  }) => {
+  test("TC-013: Multiple sequential deletions are reflected immediately", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const testProgramName = `Test Program ${suffix}`;
-    const dataScienceName = `Data Science 2026 ${suffix}`;
-    const cloudProgramName = `Cloud Engineering 2026 ${suffix}`;
+    const testProgramName = `OleRodi Test Program ${suffix}`;
+    const dataScienceName = `OleRodi Data Science 2026 ${suffix}`;
+    const cloudProgramName = `OleRodi Cloud Engineering 2026 ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, testProgramName, "TC-013 seq delete A");
-    await createProgram(page, dataScienceName, "TC-013 seq delete B");
-    await createProgram(page, cloudProgramName, "TC-013 seq delete C");
+    await createProgram(page, trackProgram, testProgramName, "TC-013 seq delete A");
+    await createProgram(page, trackProgram, dataScienceName, "TC-013 seq delete B");
+    await createProgram(page, trackProgram, cloudProgramName, "TC-013 seq delete C");
 
     page.on("dialog", async (dialog) => {
       await dialog.accept();
@@ -457,19 +420,17 @@ test.describe("Delete Program – Edge Cases", () => {
     await expect(programRow(page, cloudProgramName)).toBeVisible();
   });
 
-  test("TC-014: List count and pagination adjust after deletion", async ({
-    page,
-  }) => {
+  test("TC-014: List count and pagination adjust after deletion", async ({ page, trackProgram }) => {
     test.setTimeout(120000);
 
     const suffix = Date.now();
-    const batchPrefix = `Paginate Probe ${suffix}`;
+    const batchPrefix = `OleRodi Paginate Probe ${suffix}`;
 
     await goToPrograms(page);
 
     const batchSize = 3;
     for (let i = 0; i < batchSize; i++) {
-      await createProgram(page, `${batchPrefix} #${i}`, `TC-014 batch ${i}`);
+      await createProgram(page, trackProgram, `OleRodi ${batchPrefix} #${i}`, `TC-014 batch ${i}`);
     }
 
     const batchRows = page.getByRole("row").filter({ hasText: batchPrefix });
@@ -492,14 +453,12 @@ test.describe("Delete Program – Edge Cases", () => {
     await expect(batchRows).toHaveCount(batchSize - 1);
   });
 
-  test("TC-015: Deletion persists after page reload", async ({
-    page,
-  }) => {
+  test("TC-015: Deletion persists after page reload", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-015 persistence test");
+    await createProgram(page, trackProgram, programName, "TC-015 persistence test");
 
     page.on("dialog", async (dialog) => {
       await dialog.accept();
@@ -519,14 +478,12 @@ test.describe("Delete Program – Edge Cases", () => {
     ).toHaveCount(0);
   });
 
-  test("TC-016: Undo/recovery availability documented", async ({
-    page,
-  }) => {
+  test("TC-016: Undo/recovery availability documented", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-016 undo availability test");
+    await createProgram(page, trackProgram, programName, "TC-016 undo availability test");
 
     let dialogMessage = "";
 
@@ -549,14 +506,12 @@ test.describe("Delete Program – Edge Cases", () => {
     await expect(undoControl).toHaveCount(0);
   });
 
-  test("TC-017: Special-character program names are handled correctly in dialog and deletion", async ({
-    page,
-  }) => {
+  test("TC-017: Special-character program names are handled correctly in dialog and deletion", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Informatique & IA - Niveau 2 ${suffix}`;
+    const programName = `OleRodi Informatique & IA - Niveau 2 ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-017 special characters delete test");
+    await createProgram(page, trackProgram, programName, "TC-017 special characters delete test");
 
     let dialogMessage = "";
 
@@ -576,16 +531,14 @@ test.describe("Delete Program – Edge Cases", () => {
     expect(dialogMessage).not.toContain("&amp;");
   });
 
-  test("TC-018: Correct record is deleted when similar names exist", async ({
-    page,
-  }) => {
+  test("TC-018: Correct record is deleted when similar names exist", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const baseName = `Test Program ${suffix}`;
-    const extendedName = `Test Program 2 ${suffix}`;
+    const baseName = `OleRodi Test Program ${suffix}`;
+    const extendedName = `OleRodi Test Program 2 ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, baseName, "TC-018 base name");
-    await createProgram(page, extendedName, "TC-018 extended similar name");
+    await createProgram(page, trackProgram, baseName, "TC-018 base name");
+    await createProgram(page, trackProgram, extendedName, "TC-018 extended similar name");
 
     page.on("dialog", async (dialog) => {
       await dialog.accept();
@@ -600,14 +553,12 @@ test.describe("Delete Program – Edge Cases", () => {
     await expect(programRow(page, baseName)).toBeVisible();
   });
 
-  test("TC-019: Keyboard interaction supports safe confirmation flow", async ({
-    page,
-  }) => {
+  test("TC-019: Keyboard interaction supports safe confirmation flow", async ({ page, trackProgram }) => {
     const suffix = Date.now();
-    const programName = `Test Program ${suffix}`;
+    const programName = `OleRodi Test Program ${suffix}`;
 
     await goToPrograms(page);
-    await createProgram(page, programName, "TC-019 keyboard flow test");
+    await createProgram(page, trackProgram, programName, "TC-019 keyboard flow test");
 
     let dialogCount = 0;
 
