@@ -9,14 +9,6 @@ import { clickCreateAndTrack, createProgram } from "../../support/playwright-pro
 const PROGRAM_NAME = "OleRodi Web Development 2026";
 const PROGRAM_DESC = "Full-stack web development program";
 
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByRole("textbox", { name: "Email" }).fill(process.env.DIDAXIS_EMAIL!);
-  await page.getByRole("textbox", { name: "Password" }).fill(process.env.DIDAXIS_PASSWORD!);
-  await page.getByRole("button", { name: "Sign In" }).click();
-  await page.waitForURL("**/");
-}
-
 async function goToPrograms(page: Page) {
   await page.getByRole("button", { name: "Programs" }).click();
   await page.waitForURL("**/programs");
@@ -36,10 +28,6 @@ function uniqueId() {
 function programRow(page: Page, name: string) {
   return page.getByRole("row").filter({ hasText: name }).first();
 }
-
-test.beforeEach(async ({ page }) => {
-  await login(page);
-});
 
 test.describe("Programs – Create new academic program (DS-1)", () => {
   test("TC-001: Navigate to program creation form", async ({ page, trackProgram }) => {

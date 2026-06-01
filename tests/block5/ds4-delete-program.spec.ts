@@ -1,14 +1,6 @@
 import { test, expect } from "../../fixtures/cleanup.fixture";
 import { createProgram } from "../../support/playwright-program-helpers";
 
-test.beforeEach(async ({ page }) => {
-  await page.goto("/login");
-  await page.getByRole("textbox", { name: "Email" }).fill(process.env.DIDAXIS_EMAIL!);
-  await page.getByRole("textbox", { name: "Password" }).fill(process.env.DIDAXIS_PASSWORD!);
-  await page.getByRole("button", { name: "Sign In" }).click();
-  await page.waitForURL("**/");
-});
-
 async function goToPrograms(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Programs" }).click();
   await page.waitForURL("**/programs");

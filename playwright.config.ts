@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { defineConfig, devices } from '@playwright/test';
+import { AUTH_FILE } from './support/auth.constant';
 
 export default defineConfig({
   testDir: 'tests',
@@ -19,5 +20,16 @@ export default defineConfig({
       slowMo: 1000,
     },
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    {
+      name: 'chromium',
+      testIgnore: /.*\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: AUTH_FILE,
+      },
+      dependencies: ['setup'],
+    },
+  ],
 });

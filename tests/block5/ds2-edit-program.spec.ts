@@ -1,15 +1,8 @@
 import { test, expect, type Page } from "../../fixtures/cleanup.fixture";
 import { createProgram } from "../../support/playwright-program-helpers";
+import { AUTH_FILE } from "../../support/auth.constant";
 
 const PROGRAM_NAME = "OleRodi Web Development 2026";
-
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByRole("textbox", { name: "Email" }).fill(process.env.DIDAXIS_EMAIL!);
-  await page.getByRole("textbox", { name: "Password" }).fill(process.env.DIDAXIS_PASSWORD!);
-  await page.getByRole("button", { name: "Sign In" }).click();
-  await page.waitForURL("**/");
-}
 
 async function goToPrograms(page: Page) {
   await page.getByRole("button", { name: "Programs" }).click();
@@ -28,10 +21,6 @@ async function openEditDialog(page: Page, programName: string) {
 function uniqueId() {
   return Date.now().toString();
 }
-
-test.beforeEach(async ({ page }) => {
-  await login(page);
-});
 
 test.describe("Programs – Edit existing program details (DS-2)", () => {
   test("TC-001: Edit form opens with existing program data pre-populated", async ({ page, trackProgram }) => {
@@ -532,16 +521,18 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
 
     const contextA = await browser.newContext({
       baseURL: process.env.DIDAXIS_URL,
+      storageState: AUTH_FILE,
     });
     const contextB = await browser.newContext({
       baseURL: process.env.DIDAXIS_URL,
+      storageState: AUTH_FILE,
     });
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
-    await login(pageA);
-    await login(pageB);
+    await pageA.goto("/");
+    await pageB.goto("/");
 
     await goToPrograms(pageA);
     await createProgram(pageA, trackProgram, programName, "TC-020 concurrent baseline");

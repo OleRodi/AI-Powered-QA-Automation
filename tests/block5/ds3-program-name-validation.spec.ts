@@ -4,14 +4,6 @@ import {
   trackProgramByName,
 } from "../../support/playwright-program-helpers";
 
-test.beforeEach(async ({ page }) => {
-  await page.goto("/login");
-  await page.getByRole("textbox", { name: "Email" }).fill(process.env.DIDAXIS_EMAIL!);
-  await page.getByRole("textbox", { name: "Password" }).fill(process.env.DIDAXIS_PASSWORD!);
-  await page.getByRole("button", { name: "Sign In" }).click();
-  await page.waitForURL("**/");
-});
-
 test.describe("Programs – DS-3 Program Name Validation – Positive Flows", () => {
   test("TC-001: Program is created when name contains valid special characters", async ({ page, trackProgram }) => {
     const suffix = Date.now();

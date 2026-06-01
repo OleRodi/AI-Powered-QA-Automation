@@ -44,6 +44,10 @@ export const test = base.extend<CleanupFixtures>({
   },
 });
 
+test.beforeEach(async ({ page }) => {
+  await page.goto("/");
+});
+
 export { expect };
 export type { Page } from "@playwright/test";
 
