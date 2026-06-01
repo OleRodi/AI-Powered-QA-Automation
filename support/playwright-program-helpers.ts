@@ -1,6 +1,8 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { trackProgramFromCreateResponse } from "../fixtures/cleanup.fixture";
 import { getAllPrograms } from "./delete-program";
+import { ProgramsPage } from "../pages/programs.page";
+import type { NewProgramModal } from "../pages/components/new-program.modal";
 
 export const TEST_PROGRAM_OWNER = "OleRodi";
 
@@ -16,11 +18,9 @@ export function testProgramName(base: string, suffix: string | number = Date.now
 export async function clickCreateAndTrack(
   page: Page,
   trackProgram: (uuid: string) => void,
-  dialog: Locator
+  modal: NewProgramModal
 ): Promise<void> {
-  await trackProgramFromCreateResponse(page, trackProgram, async () => {
-    await dialog.getByRole("button", { name: "Create" }).click();
-  });
+  await trackProgramFromCreateResponse(page, trackProgram, () => modal.submit());
 }
 
 export async function createProgram(
@@ -28,14 +28,13 @@ export async function createProgram(
   trackProgram: (uuid: string) => void,
   name: string,
   description: string
-): Promise<void> {
-  await page.getByRole("button", { name: "+ New Program" }).click();
-  const dialog = page.getByRole("dialog");
-  await dialog.getByRole("textbox", { name: "Program Name" }).fill(name);
-  await dialog.getByRole("textbox", { name: "Description" }).fill(description);
-  await clickCreateAndTrack(page, trackProgram, dialog);
-  await expect(dialog).toBeHidden();
-  await expect(page.getByRole("row").filter({ hasText: name }).first()).toBeVisible();
+): Promise<ProgramsPage> {
+  const programs = new ProgramsPage(page);
+  await programs.nav.goToPrograms();
+  await programs.openNewProgram();
+  await programs.newProgramModal.fill(name, description);
+  await clickCreateAndTrack(page, trackProgram, programs.newProgramModal);
+  return programs;
 }
 
 export async function trackProgramByName(

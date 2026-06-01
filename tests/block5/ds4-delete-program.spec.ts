@@ -1,25 +1,13 @@
 import { test, expect } from "../../fixtures/cleanup.fixture";
 import { createProgram } from "../../support/playwright-program-helpers";
-
-async function goToPrograms(page: import("@playwright/test").Page) {
-  await page.getByRole("button", { name: "Programs" }).click();
-  await page.waitForURL("**/programs");
-}
-
-function programRow(page: import("@playwright/test").Page, name: string) {
-  return page.getByRole("row").filter({ hasText: name }).first();
-}
-
-function dataRows(page: import("@playwright/test").Page) {
-  return page.getByRole("row").filter({ hasNotText: /^Program$/ });
-}
+import { goToPrograms } from "../../support/programs-test.helpers";
 
 test.describe("Delete Program – Positive Flows", () => {
   test("TC-001: Confirmation dialog appears before program deletion", async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
     let dialogMessage = "";
@@ -31,57 +19,55 @@ test.describe("Delete Program – Positive Flows", () => {
       await dialog.dismiss();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
     await page.waitForTimeout(1000);
 
     expect(dialogFired).toBe(true);
     expect(dialogMessage).toContain(programName);
 
-    await expect(programRow(page, programName)).toBeVisible();
+    await expect(programs.programRow(programName)).toBeVisible();
   });
 
   test("TC-002: Program is removed from list after deletion is confirmed", async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
     page.on("dialog", async (dialog) => {
       await dialog.accept();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
-    await expect(
-      page.getByRole("row").filter({ hasText: programName })
-    ).toHaveCount(0);
+    await expect(programs.matchingRows(programName)).toHaveCount(0);
   });
 
   test("TC-003: Program remains in list when deletion is canceled", async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
     page.on("dialog", async (dialog) => {
       await dialog.dismiss();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
     await page.waitForTimeout(1000);
 
-    await expect(programRow(page, programName)).toBeVisible();
+    await expect(programs.programRow(programName)).toBeVisible();
   });
 
   test("TC-004: Confirmation dialog closes without side effects when dismissed via close control", async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
     let dialogCount = 0;
@@ -91,13 +77,13 @@ test.describe("Delete Program – Positive Flows", () => {
       await dialog.dismiss();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
     await page.waitForTimeout(1000);
 
     expect(dialogCount).toBe(1);
 
-    await expect(programRow(page, programName)).toBeVisible();
+    await expect(programs.programRow(programName)).toBeVisible();
   });
 
   test("TC-005: Delete icon is visible and functional for each program row", async ({ page, trackProgram }) => {
@@ -105,15 +91,15 @@ test.describe("Delete Program – Positive Flows", () => {
     const testProgramName = `OleRodi Test Program ${suffix}`;
     const dataScienceName = `OleRodi Data Science 2026 ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, testProgramName, "TC-005 delete icon visibility test");
     await createProgram(page, trackProgram, dataScienceName, "TC-005 secondary program");
 
-    const testRow = programRow(page, testProgramName);
-    const dataScienceRow = programRow(page, dataScienceName);
+    const testRow = programs.programRow(testProgramName);
+    const dataScienceRow = programs.programRow(dataScienceName);
 
-    await expect(testRow.getByRole("button", { name: "🗑" })).toBeVisible();
-    await expect(dataScienceRow.getByRole("button", { name: "🗑" })).toBeVisible();
+    await expect(programs.deleteButtonFor(testProgramName)).toBeVisible();
+    await expect(programs.deleteButtonFor(dataScienceName)).toBeVisible();
 
     let dialogMessage = "";
 
@@ -122,7 +108,7 @@ test.describe("Delete Program – Positive Flows", () => {
       await dialog.dismiss();
     });
 
-    await dataScienceRow.getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(dataScienceName).click();
 
     await page.waitForTimeout(1000);
 
@@ -137,7 +123,7 @@ test.describe("Delete Program – Positive Flows", () => {
     const suffix = Date.now();
     const cloudProgramName = `OleRodi Cloud Engineering 2026 ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, cloudProgramName, "TC-006 dialog identity test");
 
     let dialogMessage = "";
@@ -147,7 +133,7 @@ test.describe("Delete Program – Positive Flows", () => {
       await dialog.dismiss();
     });
 
-    await programRow(page, cloudProgramName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(cloudProgramName).click();
 
     await page.waitForTimeout(1000);
 
@@ -161,7 +147,7 @@ test.describe("Delete Program – Negative Flows", () => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-007 no optimistic removal test");
 
     let deleteRequested = false;
@@ -177,12 +163,12 @@ test.describe("Delete Program – Negative Flows", () => {
       await dialog.dismiss();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
     await page.waitForTimeout(1000);
 
     expect(deleteRequested).toBe(false);
-    await expect(programRow(page, programName)).toBeVisible();
+    await expect(programs.programRow(programName)).toBeVisible();
 
     await page.unroute(/\/programs/i);
   });
@@ -191,7 +177,7 @@ test.describe("Delete Program – Negative Flows", () => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-008 backend failure test");
 
     await page.route(/\/programs/i, async (route) => {
@@ -210,11 +196,11 @@ test.describe("Delete Program – Negative Flows", () => {
       await dialog.accept();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
     await page.waitForTimeout(2000);
 
-    await expect(programRow(page, programName)).toBeVisible();
+    await expect(programs.programRow(programName)).toBeVisible();
 
     await page.unroute(/\/programs/i);
   });
@@ -223,7 +209,7 @@ test.describe("Delete Program – Negative Flows", () => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-009 authorization test");
 
     await page.route(/\/programs/i, async (route) => {
@@ -242,11 +228,11 @@ test.describe("Delete Program – Negative Flows", () => {
       await dialog.accept();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
     await page.waitForTimeout(2000);
 
-    await expect(programRow(page, programName)).toBeVisible();
+    await expect(programs.programRow(programName)).toBeVisible();
 
     await page.unroute(/\/programs/i);
   });
@@ -255,7 +241,7 @@ test.describe("Delete Program – Negative Flows", () => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-010 double click test");
 
     let deleteRequestCount = 0;
@@ -273,11 +259,9 @@ test.describe("Delete Program – Negative Flows", () => {
       await dialog.accept();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
-    await expect(
-      page.getByRole("row").filter({ hasText: programName })
-    ).toHaveCount(0);
+    await expect(programs.matchingRows(programName)).toHaveCount(0);
 
     await page.waitForTimeout(1000);
 
@@ -290,7 +274,7 @@ test.describe("Delete Program – Negative Flows", () => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-011 referential constraint test");
 
     await page.route(/\/programs/i, async (route) => {
@@ -312,11 +296,11 @@ test.describe("Delete Program – Negative Flows", () => {
       await dialog.accept();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
     await page.waitForTimeout(2000);
 
-    await expect(programRow(page, programName)).toBeVisible();
+    await expect(programs.programRow(programName)).toBeVisible();
 
     await page.unroute(/\/programs/i);
   });
@@ -365,21 +349,20 @@ test.describe("Delete Program – Edge Cases", () => {
       }
     });
 
-    await goToPrograms(page);
-    await page.reload();
-    await page.waitForURL("**/programs");
+    const programs = await goToPrograms(page);
+    await programs.reload();
 
-    const row = programRow(page, programName);
+    const row = programs.programRow(programName);
     await expect(row).toBeVisible();
 
     page.on("dialog", async (dialog) => {
       await dialog.accept();
     });
 
-    await row.getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
-    await expect(dataRows(page)).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "+ New Program" })).toBeVisible();
+    await expect(programs.dataRows()).toHaveCount(0);
+    await expect(programs.newProgramButton).toBeVisible();
 
     await page.unroute(/\/api\/programs/i);
   });
@@ -390,7 +373,7 @@ test.describe("Delete Program – Edge Cases", () => {
     const dataScienceName = `OleRodi Data Science 2026 ${suffix}`;
     const cloudProgramName = `OleRodi Cloud Engineering 2026 ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, testProgramName, "TC-013 seq delete A");
     await createProgram(page, trackProgram, dataScienceName, "TC-013 seq delete B");
     await createProgram(page, trackProgram, cloudProgramName, "TC-013 seq delete C");
@@ -399,17 +382,13 @@ test.describe("Delete Program – Edge Cases", () => {
       await dialog.accept();
     });
 
-    await programRow(page, testProgramName).getByRole("button", { name: "🗑" }).click();
-    await expect(
-      page.getByRole("row").filter({ hasText: testProgramName })
-    ).toHaveCount(0);
+    await programs.deleteButtonFor(testProgramName).click();
+    await expect(programs.matchingRows(testProgramName)).toHaveCount(0);
 
-    await programRow(page, dataScienceName).getByRole("button", { name: "🗑" }).click();
-    await expect(
-      page.getByRole("row").filter({ hasText: dataScienceName })
-    ).toHaveCount(0);
+    await programs.deleteButtonFor(dataScienceName).click();
+    await expect(programs.matchingRows(dataScienceName)).toHaveCount(0);
 
-    await expect(programRow(page, cloudProgramName)).toBeVisible();
+    await expect(programs.programRow(cloudProgramName)).toBeVisible();
   });
 
   test("TC-014: List count and pagination adjust after deletion", async ({ page, trackProgram }) => {
@@ -418,28 +397,31 @@ test.describe("Delete Program – Edge Cases", () => {
     const suffix = Date.now();
     const batchPrefix = `OleRodi Paginate Probe ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
 
     const batchSize = 3;
+    const batchNames = Array.from(
+      { length: batchSize },
+      (_, i) => `OleRodi ${batchPrefix} #${i}`
+    );
     for (let i = 0; i < batchSize; i++) {
-      await createProgram(page, trackProgram, `OleRodi ${batchPrefix} #${i}`, `TC-014 batch ${i}`);
+      await createProgram(page, trackProgram, batchNames[i], `TC-014 batch ${i}`);
     }
 
-    const batchRows = page.getByRole("row").filter({ hasText: batchPrefix });
+    const batchRows = programs.matchingRows(batchPrefix);
     await expect(batchRows).toHaveCount(batchSize);
 
-    const paginationNext = page.getByRole("button", { name: /next|page 2|›|»/i });
-    const hasPagination = await paginationNext.isVisible().catch(() => false);
+    const hasPagination = await programs.paginationNext.isVisible().catch(() => false);
 
     page.on("dialog", async (dialog) => {
       await dialog.accept();
     });
 
     if (hasPagination) {
-      await paginationNext.click();
-      await batchRows.last().getByRole("button", { name: "🗑" }).click();
+      await programs.paginationNext.click();
+      await programs.deleteButtonFor(batchNames[batchSize - 1]).click();
     } else {
-      await batchRows.first().getByRole("button", { name: "🗑" }).click();
+      await programs.deleteButtonFor(batchNames[0]).click();
     }
 
     await expect(batchRows).toHaveCount(batchSize - 1);
@@ -449,32 +431,27 @@ test.describe("Delete Program – Edge Cases", () => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-015 persistence test");
 
     page.on("dialog", async (dialog) => {
       await dialog.accept();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
-    await expect(
-      page.getByRole("row").filter({ hasText: programName })
-    ).toHaveCount(0);
+    await expect(programs.matchingRows(programName)).toHaveCount(0);
 
-    await page.reload();
-    await page.waitForURL("**/programs");
+    await programs.reload();
 
-    await expect(
-      page.getByRole("row").filter({ hasText: programName })
-    ).toHaveCount(0);
+    await expect(programs.matchingRows(programName)).toHaveCount(0);
   });
 
   test("TC-016: Undo/recovery availability documented", async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-016 undo availability test");
 
     let dialogMessage = "";
@@ -484,25 +461,22 @@ test.describe("Delete Program – Edge Cases", () => {
       await dialog.accept();
     });
 
-    await programRow(page, programName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
-    await expect(
-      page.getByRole("row").filter({ hasText: programName })
-    ).toHaveCount(0);
+    await expect(programs.matchingRows(programName)).toHaveCount(0);
 
     await page.waitForTimeout(1000);
 
     expect(dialogMessage.toLowerCase()).toContain("cannot be undone");
 
-    const undoControl = page.getByRole("button", { name: /undo/i });
-    await expect(undoControl).toHaveCount(0);
+    await expect(programs.undoButton).toHaveCount(0);
   });
 
   test("TC-017: Special-character program names are handled correctly in dialog and deletion", async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Informatique & IA - Niveau 2 ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-017 special characters delete test");
 
     let dialogMessage = "";
@@ -512,12 +486,9 @@ test.describe("Delete Program – Edge Cases", () => {
       await dialog.accept();
     });
 
-    const row = programRow(page, programName);
-    await row.getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
-    await expect(
-      page.getByRole("row").filter({ hasText: programName })
-    ).toHaveCount(0);
+    await expect(programs.matchingRows(programName)).toHaveCount(0);
 
     expect(dialogMessage).toContain("Informatique & IA - Niveau 2");
     expect(dialogMessage).not.toContain("&amp;");
@@ -528,7 +499,7 @@ test.describe("Delete Program – Edge Cases", () => {
     const baseName = `OleRodi Test Program ${suffix}`;
     const extendedName = `OleRodi Test Program 2 ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, baseName, "TC-018 base name");
     await createProgram(page, trackProgram, extendedName, "TC-018 extended similar name");
 
@@ -536,20 +507,18 @@ test.describe("Delete Program – Edge Cases", () => {
       await dialog.accept();
     });
 
-    await programRow(page, extendedName).getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(extendedName).click();
 
-    await expect(
-      page.getByRole("row").filter({ hasText: extendedName })
-    ).toHaveCount(0);
+    await expect(programs.matchingRows(extendedName)).toHaveCount(0);
 
-    await expect(programRow(page, baseName)).toBeVisible();
+    await expect(programs.programRow(baseName)).toBeVisible();
   });
 
   test("TC-019: Keyboard interaction supports safe confirmation flow", async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
-    await goToPrograms(page);
+    const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-019 keyboard flow test");
 
     let dialogCount = 0;
@@ -563,18 +532,16 @@ test.describe("Delete Program – Edge Cases", () => {
       }
     });
 
-    const row = programRow(page, programName);
-    await row.getByRole("button", { name: "🗑" }).click();
+    const row = programs.programRow(programName);
+    await programs.deleteButtonFor(programName).click();
 
     await page.waitForTimeout(1000);
 
     await expect(row).toBeVisible();
 
-    await row.getByRole("button", { name: "🗑" }).click();
+    await programs.deleteButtonFor(programName).click();
 
-    await expect(
-      page.getByRole("row").filter({ hasText: programName })
-    ).toHaveCount(0);
+    await expect(programs.matchingRows(programName)).toHaveCount(0);
 
     expect(dialogCount).toBe(2);
   });
