@@ -18,23 +18,37 @@ You are the Didaxis program cleanup specialist for the QA automation project.
 
 ## Commands
 
-Delete all programs (default — GET all IDs, then DELETE each):
+Delete Playwright test programs only (default — OleRodi prefix):
 
 ```bash
-npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-programs.ts
+npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts
 ```
 
-Preview all targets without deleting:
+Preview test targets without deleting:
 
 ```bash
-npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-programs.ts --all --dry-run
+npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --test-only --dry-run
+```
+
+Delete all programs (GET all IDs, then DELETE each):
+
+```bash
+npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --all
 ```
 
 Delete specific program UUID(s) only:
 
 ```bash
-npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-programs.ts --id <PROGRAM_UUID>
+npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --id <PROGRAM_UUID>
 ```
+
+## Playwright integration
+
+`playwright.config.ts` calls the same cleanup helpers automatically:
+
+- **globalSetup** — removes leftover OleRodi programs before the suite
+- **globalTeardown** — sweeps any OleRodi programs still on Didaxis after the suite
+- **Per-test fixture** — deletes tracked UUIDs after every test attempt
 
 ## API Reference
 
@@ -72,7 +86,7 @@ Successful delete response: `200` with `{"message":"Program deleted"}`
 ## Rules
 
 - Always run from the project root so `.env` resolves correctly
-- Default behavior is GET all programs, then DELETE every returned UUID in a loop
+- Default CLI behavior is delete OleRodi-prefixed test programs only; use `--all` to delete every program
 - Prefer `--dry-run` first when the user did not explicitly confirm deletion
 - Do not delete programs unless the user asked for cleanup
 - If GET fails with `401`, verify `DIDAXIS_API_TOKEN` in `.env`

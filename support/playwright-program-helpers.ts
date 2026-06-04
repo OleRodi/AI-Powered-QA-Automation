@@ -1,10 +1,11 @@
 import type { Page } from "@playwright/test";
-import { trackProgramFromCreateResponse } from "../fixtures/cleanup.fixture";
+import { expect, trackProgramFromCreateResponse } from "../fixtures/cleanup.fixture";
 import { getAllPrograms } from "./delete-program";
 import { ProgramsPage } from "../pages/programs.page";
 import type { NewProgramModal } from "../pages/components/new-program.modal";
+import { TEST_PROGRAM_OWNER } from "./test-data.constants";
 
-export const TEST_PROGRAM_OWNER = "OleRodi";
+export { TEST_PROGRAM_OWNER };
 
 export function testProgramName(base: string, suffix: string | number = Date.now()): string {
   const trimmedBase = base.trim();
@@ -34,6 +35,7 @@ export async function createProgram(
   await programs.openNewProgram();
   await programs.newProgramModal.fill(name, description);
   await clickCreateAndTrack(page, trackProgram, programs.newProgramModal);
+  await expect(programs.newProgramModal.dialog).toBeHidden();
   return programs;
 }
 

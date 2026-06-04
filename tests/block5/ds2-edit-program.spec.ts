@@ -240,8 +240,6 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
   });
 
   test("TC-012: Duplicate program name is rejected", async ({ page, trackProgram }) => {
-    test.fail(true, "Known demo bug — duplicate program names are allowed on rename.");
-
     const suffix = uniqueId();
     const targetName = `${PROGRAM_NAME} ${suffix}`;
     const duplicateName = `OleRodi Data Science ${suffix}`;

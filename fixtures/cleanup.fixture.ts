@@ -1,5 +1,8 @@
 import { test as base, expect, type Page } from "@playwright/test";
-import { deleteProgramsByIds } from "../support/delete-program";
+import {
+  deleteTrackedPrograms,
+  summarizeDeleteResults,
+} from "../support/test-program-cleanup";
 
 type CleanupFixtures = {
   trackProgram: (uuid: string) => void;
@@ -20,27 +23,9 @@ export const test = base.extend<CleanupFixtures>({
       return;
     }
 
-    const isFinalAttempt =
-      testInfo.status === "passed" ||
-      testInfo.status === "skipped" ||
-      testInfo.status === "interrupted" ||
-      testInfo.retry === testInfo.project.retries;
-
-    if (!isFinalAttempt) {
-      return;
-    }
-
-    const results = await deleteProgramsByIds([...programIds]);
-    const failures = results.filter((result) => !result.ok && result.status !== 404);
-
-    if (failures.length > 0) {
-      const summary = failures
-        .map((result) => `${result.id} (${result.status}: ${result.message})`)
-        .join("; ");
-      console.warn(
-        `[cleanup] ${testInfo.title}: failed to delete ${failures.length} program(s): ${summary}`
-      );
-    }
+    // Always delete tracked programs — including failed, timedOut, and non-final retries.
+    const results = await deleteTrackedPrograms([...programIds]);
+    summarizeDeleteResults(testInfo.title, results);
   },
 });
 

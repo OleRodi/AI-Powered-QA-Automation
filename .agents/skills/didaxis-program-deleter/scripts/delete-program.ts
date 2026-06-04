@@ -5,11 +5,16 @@ import {
   getAllPrograms,
 } from '../../../../support/delete-program';
 import { initTracker } from '../../../../support/program-tracker';
+import {
+  deleteAllTestPrograms,
+  isTestProgramName,
+} from '../../../../support/test-program-cleanup';
 
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 type CliOptions = {
   all: boolean;
+  testOnly: boolean;
   ids: string[];
   dryRun: boolean;
 };
@@ -17,6 +22,7 @@ type CliOptions = {
 function parseArgs(argv: string[]): CliOptions {
   const options: CliOptions = {
     all: false,
+    testOnly: false,
     ids: [],
     dryRun: false,
   };
@@ -26,6 +32,11 @@ function parseArgs(argv: string[]): CliOptions {
 
     if (arg === '--all') {
       options.all = true;
+      continue;
+    }
+
+    if (arg === '--test-only') {
+      options.testOnly = true;
       continue;
     }
 
@@ -59,14 +70,16 @@ function printUsage(): void {
   npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-programs.ts [options]
 
 Options:
+  --test-only        Delete only OleRodi-prefixed Playwright test programs (default)
   --all              Fetch all program UUIDs via GET /api/programs, then delete each one
   --id <uuid>        Delete a specific program UUID (repeatable)
   --dry-run          Print targets without calling DELETE
 
 Examples:
-  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-programs.ts
-  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-programs.ts --all --dry-run
-  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-programs.ts --id 3eb19aa5-6901-42ce-b510-0a8abcba513f`);
+  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts
+  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --test-only --dry-run
+  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --all
+  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --id 3eb19aa5-6901-42ce-b510-0a8abcba513f`);
 }
 
 function printResults(results: Awaited<ReturnType<typeof deleteProgramsByIds>>): void {
@@ -93,6 +106,31 @@ async function main(): Promise<void> {
   }
 
   const options = parseArgs(process.argv.slice(2));
+
+  if (options.testOnly) {
+    const programs = await getAllPrograms();
+    const testPrograms = programs.filter((program) => isTestProgramName(program.name));
+
+    if (testPrograms.length === 0) {
+      console.log('No OleRodi test programs found via GET /api/programs.');
+      return;
+    }
+
+    console.log(`Target test program(s): ${testPrograms.length}`);
+    for (const program of testPrograms) {
+      console.log(`- ${program.id} (${program.name})`);
+    }
+
+    if (options.dryRun) {
+      console.log('Dry run only. No programs were deleted.');
+      return;
+    }
+
+    const { results } = await deleteAllTestPrograms();
+    printResults(results);
+    initTracker();
+    return;
+  }
 
   if (options.all) {
     const programs = await getAllPrograms();

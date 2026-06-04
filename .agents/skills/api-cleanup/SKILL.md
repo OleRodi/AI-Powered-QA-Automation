@@ -18,13 +18,19 @@ its UUID and delete it via the API afterwards.
    `trackProgram(uuid)` immediately.
 
 3. Do not write manual `afterAll` blocks for cleanup — the fixture
-   handles teardown for every test that uses it.
+   handles teardown for every test that uses it. Cleanup runs after
+   **every** attempt (passed, failed, timedOut, and retries).
 
-4. Cleanup uses the DELETE API, not the UI:
+4. `playwright.config.ts` runs `globalSetup` / `globalTeardown` to
+   delete leftover `OleRodi`-prefixed programs via the same API as the
+   didaxis-program-deleter skill (`support/test-program-cleanup.ts`).
+
+5. Cleanup uses the DELETE API, not the UI:
    `DELETE /api/programs/<uuid>` with a Bearer token from
    `process.env.DIDAXIS_API_TOKEN`.
 
-5. Never hardcode the token. Never delete data the test did not create.
+6. Never hardcode the token. Never delete non-test programs (only
+   names starting with `OleRodi `).
 
 ## Reference
 
