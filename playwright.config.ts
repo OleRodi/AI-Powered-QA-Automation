@@ -15,9 +15,9 @@ export default defineConfig({
   use: {
     baseURL: process.env.DIDAXIS_URL,
     trace: 'on',
-    headless: false,
+    headless: !!process.env.CI,
     launchOptions: {
-      slowMo: 1000,
+      slowMo: process.env.CI ? 0 : 1000,
     },
   },
   projects: [
