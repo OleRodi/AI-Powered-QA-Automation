@@ -206,7 +206,10 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
 
     await expect(modal.dialog).toBeHidden();
     await expect(programs.programRow(trimmedName)).toBeVisible();
-    await expect(programs.matchingRows(paddedName)).toHaveCount(0);
+
+    const editModal = await openEditProgramModal(programs, trimmedName);
+    await expect(editModal.programNameInput).toHaveValue(trimmedName);
+    await editModal.cancel();
   });
 
   test("TC-014: Rapid double-click on Create does not create duplicate programs", async ({ page, trackProgram }) => {
