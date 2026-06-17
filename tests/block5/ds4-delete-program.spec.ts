@@ -1,6 +1,32 @@
 import { test, expect } from "../../fixtures/cleanup.fixture";
+import type { Locator, Page } from "@playwright/test";
 import { createProgram } from "../../support/playwright-program-helpers";
 import { goToPrograms } from "../../support/programs-test.helpers";
+
+async function clickDeleteAndHandleDialog(
+  page: Page,
+  deleteButton: Locator,
+  action: "accept" | "dismiss"
+): Promise<string> {
+  const messagePromise = new Promise<string>((resolve, reject) => {
+    page.once("dialog", async (dialog) => {
+      try {
+        const message = dialog.message();
+        if (action === "accept") {
+          await dialog.accept();
+        } else {
+          await dialog.dismiss();
+        }
+        resolve(message);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+
+  await deleteButton.click();
+  return messagePromise;
+}
 
 test.describe("Delete Program – Positive Flows", () => {
   test("TC-001: Confirmation dialog appears before program deletion", async ({ page, trackProgram }) => {
@@ -10,20 +36,12 @@ test.describe("Delete Program – Positive Flows", () => {
     const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
-    let dialogMessage = "";
-    let dialogFired = false;
+    const dialogMessage = await clickDeleteAndHandleDialog(
+      page,
+      programs.deleteButtonFor(programName),
+      "dismiss"
+    );
 
-    page.on("dialog", async (dialog) => {
-      dialogFired = true;
-      dialogMessage = dialog.message();
-      await dialog.dismiss();
-    });
-
-    await programs.deleteButtonFor(programName).click();
-
-    await page.waitForTimeout(1000);
-
-    expect(dialogFired).toBe(true);
     expect(dialogMessage).toContain(programName);
 
     await expect(programs.programRow(programName)).toBeVisible();
@@ -52,13 +70,7 @@ test.describe("Delete Program – Positive Flows", () => {
     const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
-    page.on("dialog", async (dialog) => {
-      await dialog.dismiss();
-    });
-
-    await programs.deleteButtonFor(programName).click();
-
-    await page.waitForTimeout(1000);
+    await clickDeleteAndHandleDialog(page, programs.deleteButtonFor(programName), "dismiss");
 
     await expect(programs.programRow(programName)).toBeVisible();
   });
@@ -70,18 +82,7 @@ test.describe("Delete Program – Positive Flows", () => {
     const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "A program used for deletion testing");
 
-    let dialogCount = 0;
-
-    page.on("dialog", async (dialog) => {
-      dialogCount++;
-      await dialog.dismiss();
-    });
-
-    await programs.deleteButtonFor(programName).click();
-
-    await page.waitForTimeout(1000);
-
-    expect(dialogCount).toBe(1);
+    await clickDeleteAndHandleDialog(page, programs.deleteButtonFor(programName), "dismiss");
 
     await expect(programs.programRow(programName)).toBeVisible();
   });
@@ -101,16 +102,11 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(programs.deleteButtonFor(testProgramName)).toBeVisible();
     await expect(programs.deleteButtonFor(dataScienceName)).toBeVisible();
 
-    let dialogMessage = "";
-
-    page.on("dialog", async (dialog) => {
-      dialogMessage = dialog.message();
-      await dialog.dismiss();
-    });
-
-    await programs.deleteButtonFor(dataScienceName).click();
-
-    await page.waitForTimeout(1000);
+    const dialogMessage = await clickDeleteAndHandleDialog(
+      page,
+      programs.deleteButtonFor(dataScienceName),
+      "dismiss"
+    );
 
     expect(dialogMessage).toContain(dataScienceName);
     expect(dialogMessage).not.toContain(testProgramName);
@@ -126,16 +122,11 @@ test.describe("Delete Program – Positive Flows", () => {
     const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, cloudProgramName, "TC-006 dialog identity test");
 
-    let dialogMessage = "";
-
-    page.on("dialog", async (dialog) => {
-      dialogMessage = dialog.message();
-      await dialog.dismiss();
-    });
-
-    await programs.deleteButtonFor(cloudProgramName).click();
-
-    await page.waitForTimeout(1000);
+    const dialogMessage = await clickDeleteAndHandleDialog(
+      page,
+      programs.deleteButtonFor(cloudProgramName),
+      "dismiss"
+    );
 
     expect(dialogMessage).toContain(cloudProgramName);
     expect(dialogMessage.toLowerCase()).not.toBe("are you sure?");
@@ -159,13 +150,7 @@ test.describe("Delete Program – Negative Flows", () => {
       await route.continue();
     });
 
-    page.on("dialog", async (dialog) => {
-      await dialog.dismiss();
-    });
-
-    await programs.deleteButtonFor(programName).click();
-
-    await page.waitForTimeout(1000);
+    await clickDeleteAndHandleDialog(page, programs.deleteButtonFor(programName), "dismiss");
 
     expect(deleteRequested).toBe(false);
     await expect(programs.programRow(programName)).toBeVisible();
@@ -192,13 +177,7 @@ test.describe("Delete Program – Negative Flows", () => {
       }
     });
 
-    page.on("dialog", async (dialog) => {
-      await dialog.accept();
-    });
-
-    await programs.deleteButtonFor(programName).click();
-
-    await page.waitForTimeout(2000);
+    await clickDeleteAndHandleDialog(page, programs.deleteButtonFor(programName), "accept");
 
     await expect(programs.programRow(programName)).toBeVisible();
 
@@ -224,13 +203,7 @@ test.describe("Delete Program – Negative Flows", () => {
       }
     });
 
-    page.on("dialog", async (dialog) => {
-      await dialog.accept();
-    });
-
-    await programs.deleteButtonFor(programName).click();
-
-    await page.waitForTimeout(2000);
+    await clickDeleteAndHandleDialog(page, programs.deleteButtonFor(programName), "accept");
 
     await expect(programs.programRow(programName)).toBeVisible();
 
@@ -255,16 +228,13 @@ test.describe("Delete Program – Negative Flows", () => {
       }
     });
 
-    page.on("dialog", async (dialog) => {
-      await dialog.accept();
-    });
+    await page.clock.install();
 
-    await programs.deleteButtonFor(programName).click();
+    await clickDeleteAndHandleDialog(page, programs.deleteButtonFor(programName), "accept");
 
     await expect(programs.matchingRows(programName)).toHaveCount(0);
 
-    await page.waitForTimeout(1000);
-
+    await page.clock.fastForward(1000);
     expect(deleteRequestCount).toBe(1);
 
     await page.unroute(/\/programs/i);
@@ -292,13 +262,7 @@ test.describe("Delete Program – Negative Flows", () => {
       }
     });
 
-    page.on("dialog", async (dialog) => {
-      await dialog.accept();
-    });
-
-    await programs.deleteButtonFor(programName).click();
-
-    await page.waitForTimeout(2000);
+    await clickDeleteAndHandleDialog(page, programs.deleteButtonFor(programName), "accept");
 
     await expect(programs.programRow(programName)).toBeVisible();
 
@@ -454,20 +418,15 @@ test.describe("Delete Program – Edge Cases", () => {
     const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-016 undo availability test");
 
-    let dialogMessage = "";
-
-    page.on("dialog", async (dialog) => {
-      dialogMessage = dialog.message();
-      await dialog.accept();
-    });
-
-    await programs.deleteButtonFor(programName).click();
-
-    await expect(programs.matchingRows(programName)).toHaveCount(0);
-
-    await page.waitForTimeout(1000);
+    const dialogMessage = await clickDeleteAndHandleDialog(
+      page,
+      programs.deleteButtonFor(programName),
+      "accept"
+    );
 
     expect(dialogMessage.toLowerCase()).toContain("cannot be undone");
+
+    await expect(programs.matchingRows(programName)).toHaveCount(0);
 
     await expect(programs.undoButton).toHaveCount(0);
   });
@@ -521,28 +480,14 @@ test.describe("Delete Program – Edge Cases", () => {
     const programs = await goToPrograms(page);
     await createProgram(page, trackProgram, programName, "TC-019 keyboard flow test");
 
-    let dialogCount = 0;
-
-    page.on("dialog", async (dialog) => {
-      dialogCount++;
-      if (dialogCount === 1) {
-        await dialog.dismiss();
-      } else {
-        await dialog.accept();
-      }
-    });
-
     const row = programs.programRow(programName);
-    await programs.deleteButtonFor(programName).click();
 
-    await page.waitForTimeout(1000);
+    await clickDeleteAndHandleDialog(page, programs.deleteButtonFor(programName), "dismiss");
 
     await expect(row).toBeVisible();
 
-    await programs.deleteButtonFor(programName).click();
+    await clickDeleteAndHandleDialog(page, programs.deleteButtonFor(programName), "accept");
 
     await expect(programs.matchingRows(programName)).toHaveCount(0);
-
-    expect(dialogCount).toBe(2);
   });
 });

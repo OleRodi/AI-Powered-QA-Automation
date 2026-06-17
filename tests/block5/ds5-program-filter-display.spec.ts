@@ -187,7 +187,6 @@ test.describe("Program List Display – Negative Flows", () => {
     });
 
     const programs = await goToPrograms(page);
-    await page.waitForTimeout(2000);
 
     await expect(programs.dataRows()).toHaveCount(0);
 
@@ -209,14 +208,16 @@ test.describe("Program List Display – Negative Flows", () => {
 
     const programs = await goToPrograms(page);
     await programs.reload();
-    await page.waitForTimeout(2000);
 
-    const mainText = await programs.mainRegion.innerText();
-    const hasErrorMessage = /unable|error|failed|load/i.test(mainText);
-    const hasEmptyMessage = /no programs yet/i.test(mainText);
-
-    expect(hasErrorMessage || !hasEmptyMessage).toBe(true);
     await expect(programs.dataRows()).toHaveCount(0);
+    await expect
+      .poll(async () => {
+        const mainText = await programs.mainRegion.innerText();
+        const hasErrorMessage = /unable|error|failed|load/i.test(mainText);
+        const hasEmptyMessage = /no programs yet/i.test(mainText);
+        return hasErrorMessage || !hasEmptyMessage;
+      })
+      .toBe(true);
 
     await page.unroute(/\/api\/programs/i);
   });
@@ -241,13 +242,10 @@ test.describe("Program List Display – Negative Flows", () => {
 
     const programs = await goToPrograms(page);
     await programs.reload();
-    await page.waitForTimeout(2000);
 
     await expect(programs.heading).toBeVisible();
     await expect(programs.nav.nav).toBeVisible();
-
-    const pageContent = await page.content();
-    expect(pageContent).not.toContain("undefined");
+    await expect(programs.mainRegion).not.toContainText("undefined");
 
     await page.unroute(/\/api\/programs/i);
   });

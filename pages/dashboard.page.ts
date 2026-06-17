@@ -23,4 +23,8 @@ export class DashboardPage extends BasePage {
   async goto(): Promise<void> {
     await this.page.goto(`${this.baseURL}/`);
   }
+
+  async clickProgramsQuickStart(): Promise<void> {
+    await this.programsCard.click();
+  }
 }
