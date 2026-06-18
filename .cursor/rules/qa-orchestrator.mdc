@@ -28,30 +28,20 @@ alwaysApply: false
 - Atlassian MCP — read ticket
 - GitHub MCP or `gh` — read runs
 - Terminal — `npx playwright test`
-- Delegate to specialist agents (`.cursor/agents/`): `test-writer`, `triage`, `bug-reporter`
+- Delegate to specialist agents (`test-writer`, `triage`, `bug-reporter`)
 
 ## Skills
 
-- `jira-ticket-analyzer` (`.agents/skills/jira-ticket-analyzer/SKILL.md`) — the coordinator owns "analyze"
+- `jira-ticket-analyzer` — the coordinator owns "analyze"
 
 ## Routing
 
-- **Ticket given** → analyze → produce test plan → save to `features/<ticket-key>.feature.md`
-- **Plan ready** → delegate to `test-writer`
-- **Spec returned** → run: `npx playwright test <spec-path>`
+- **Ticket given** → analyze → produce test plan → save to `features/{ticket_number}`
+- **Plan ready** → delegate to `test-writer` (ref: playwright-conventions.mdc)
+- **Spec returned** → run: `npx playwright test`
 - **Run is red** → delegate to `triage`
-- **Real app bug** → delegate to `bug-reporter` (after human confirms)
+- **Real app bug** → delegate to `bug-reporter`
 - **Test issue** → delegate to `test-writer` (propose fix, human OKs)
-
-## Delegation pattern
-
-Use the Task tool with the matching subagent type:
-
-```
-test-writer  → write Playwright spec from plan; returns spec path
-triage       → classify red run as real app bug | test issue
-bug-reporter → file Jira bug linked to story (human-confirmed only)
-```
 
 ## Done
 
