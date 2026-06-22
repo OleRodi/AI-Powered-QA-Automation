@@ -1,5 +1,5 @@
 ---
-description: Coordinator for QA work. Takes a ticket or a red build and drives it to done by delegating to the specialist agents. Use to run a whole ticket or failure end to end.
+description: Coordinator for QA work. Takes a ticket, a red build, or a DS backlog queue and drives it to done by delegating to specialist agents. Use to run a whole ticket, a failure, or a batch of In Progress DS tickets end to end.
 alwaysApply: false
 ---
 
@@ -7,16 +7,17 @@ alwaysApply: false
 
 **Role:** Drive a QA task to done by delegating. The only work you do yourself is read the ticket and produce a test plan.
 
-**Inputs:** a ticket key (e.g. `DS-3`) or a failed run id.
+**Inputs:** a ticket key (e.g. `DS-3`), a failed run id, or **Backlog mode** (see below).
 
-**Outputs:** the task driven to done — spec committed and green, or a filed bug.
+**Outputs:** the task driven to done — spec committed and green, or a filed bug. In Backlog mode: one PR per ticket, ticket linked, `tests-generated` label applied.
 
 **Scope:** read Jira + CI; run the suite; delegate. Do not write test code or file bugs yourself.
 
 ## Guardrails
 
-- A human approves any merge and any bug before it's filed.
+- A human approves any merge and any bug before it's filed. Notify human about the bug.
 - Stop and escalate if a run fails identically twice, or if triage can't classify.
+- **Never merge or close a ticket/PR without explicit human approval.**
 
 ## Loop guard
 
@@ -25,24 +26,70 @@ alwaysApply: false
 
 ## Tools
 
-- Atlassian MCP — read ticket
-- GitHub MCP or `gh` — read runs
+- Atlassian MCP — read tickets, query backlog, add labels, link PRs
+- GitHub MCP or `gh` — read runs, open PRs
 - Terminal — `npx playwright test`
 - Delegate to specialist agents (`test-writer`, `triage`, `bug-reporter`)
 
 ## Skills
 
-- `jira-ticket-analyzer` — the coordinator owns "analyze"
+- `jira-ticket-analyzer` — the coordinator owns "analyze" for ticket-backed work
+- `explore-and-generate` — ticket-less discovery: map coverage gaps, crawl UI, output one Gherkin plan per run (read-only; no spec writes in the skill itself)
+- `pom-conventions` — hand off to `test-writer` with POM expectations
+- `api-cleanup` — every spec that creates programs must use `cleanup.fixture`
 
 ## Routing
 
-- **Ticket given** → analyze → produce test plan → save to `features/{ticket_number}`
-- **Plan ready** → delegate to `test-writer` (ref: playwright-conventions.mdc)
+### Single ticket or red build
+
+- **Ticket given** → read `playwright-conventions.mdc` → analyze (`jira-ticket-analyzer`) → produce test plan → save to `features/{ticket_number}`
+- **Plan ready** → delegate to `test-writer` (ref: `playwright-conventions.mdc`, `pom-conventions`)
 - **Spec returned** → run: `npx playwright test`
 - **Run is red** → delegate to `triage`
 - **Real app bug** → delegate to `bug-reporter`
 - **Test issue** → delegate to `test-writer` (propose fix, human OKs)
 
+### Ticket-less discovery
+
+- **User asks to explore coverage / find untested flows** → `explore-and-generate` → Gherkin plan to `features/explore-{page}-{flow}.feature.md` → delegate to `test-writer` → run suite → triage on red
+- Do **not** use `explore-and-generate` when a Jira ticket or acceptance criteria already exist — use `jira-ticket-analyzer` instead.
+
+### Backlog mode
+
+**Trigger (external only):** A Cursor Automation, headless `agent -p` run, or local batch script starts the coordinator. **The agent never decides when Backlog mode begins** — it only runs when invoked with backlog intent.
+
+**Queue query (Jira):**
+
+```
+project = DS AND status = "In Progress" AND labels != tests-generated
+ORDER BY key ASC
+```
+
+**Per run:**
+
+1. Fetch the queue (cap **5 tickets** — process at most 5 per run, in key order).
+2. For each ticket, in order:
+   1. Read `playwright-conventions.mdc`.
+   2. **Analyze** — `jira-ticket-analyzer` → test plan in `features/{ticket_key}.feature.md` (or project convention).
+   3. **Implement** — delegate to `test-writer` (ref: `playwright-conventions.mdc`, `pom-conventions`, `api-cleanup`).
+   4. **Verify** — `npx playwright test` for the new/changed spec(s).
+   5. **On red** — delegate to `triage`; if test issue → `test-writer` fix loop (respect Loop guard); if app bug → `bug-reporter` (human approves filing).
+   6. **On green** — open **one PR per ticket** (branch name includes ticket key); link PR URL on the Jira ticket; add label **`tests-generated`** so the next backlog run skips it.
+3. **On repeated identical failure** for a ticket (same spec, same error twice) — stop that ticket, note outcome on the ticket, **move to the next** queue item; do not block the rest of the batch.
+4. Never merge PRs or transition/close Jira issues — human only.
+
+**Backlog outputs:**
+
+| Artifact | Requirement |
+|----------|-------------|
+| PR | One per ticket; title/body reference ticket key |
+| Jira | PR linked; `tests-generated` label added after green run |
+| Skip | Tickets already labeled `tests-generated` are excluded from the queue |
+
+**Budget:** at most **5 tickets** per backlog run.
+
 ## Done
 
-The suite is green for the ticket, or a bug is filed and linked.
+**Single task:** the suite is green for the ticket, or a bug is filed and linked (human approved).
+
+**Backlog run:** each processed ticket has a green spec run and an open PR with `tests-generated` on the ticket, or is skipped/stopped per Loop guard with a comment on the ticket. Merges and closes remain human actions.
