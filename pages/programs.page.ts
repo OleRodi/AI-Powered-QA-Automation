@@ -20,6 +20,9 @@ export class ProgramsPage extends BasePage {
   readonly paginationNext;
   readonly programCountIndicator;
   readonly semesterHeading;
+  readonly semesterConfigSubtitle;
+  readonly addSemesterButton;
+  readonly manageCoursesButton;
   readonly manageCoursesOrSemesterButton;
   readonly undoButton;
   readonly allRows;
@@ -41,6 +44,9 @@ export class ProgramsPage extends BasePage {
     this.paginationNext = page.getByRole("button", { name: /next|page 2|›|»/i });
     this.programCountIndicator = page.getByText(/^\d+\s+Programs?$/i);
     this.semesterHeading = page.getByText(/semesters?/i).first();
+    this.semesterConfigSubtitle = page.getByText("Semesters & scheduling config");
+    this.addSemesterButton = page.getByRole("button", { name: "+ Semester" });
+    this.manageCoursesButton = page.getByRole("button", { name: "Manage Courses" });
     this.manageCoursesOrSemesterButton = page
       .getByRole("button", { name: /\+ Semester|Manage Courses/i })
       .first();
@@ -93,6 +99,14 @@ export class ProgramsPage extends BasePage {
 
   async openEditFor(programName: string): Promise<void> {
     await this.editButtonFor(programName).click();
+  }
+
+  semesterPanelHeading(programName: string): Locator {
+    return this.page.getByRole("heading", { name: programName, level: 4 });
+  }
+
+  async selectProgram(programName: string): Promise<void> {
+    await this.programRow(programName).click();
   }
 
   async deleteProgram(programName: string, acceptDialog = true): Promise<void> {
