@@ -293,7 +293,11 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     );
     await modal.createButton.click();
 
-    const disabledWhilePending = await modal.createButton.isDisabled();
+    // Web-first assertion instead of a one-shot isDisabled() snapshot: while the
+    // delayed POST is in flight the Create button must be disabled to guard
+    // against double-submit (tracked in DS-128 / DS-110).
+    await expect(modal.createButton).toBeDisabled();
+
     const response = await responsePromise;
     const body = (await response.json()) as { data?: { id?: string }; id?: string };
     const programId = body.data?.id ?? body.id;
@@ -303,7 +307,6 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
 
     await page.unroute(/\/programs/i);
 
-    expect(disabledWhilePending).toBe(true);
     await expect(modal.dialog).toBeHidden({ timeout: 15000 });
     await expect(programs.matchingRows(programName)).toHaveCount(1);
   });
