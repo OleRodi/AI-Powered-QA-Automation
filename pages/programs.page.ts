@@ -33,7 +33,7 @@ export class ProgramsPage extends BasePage {
     this.heading = page.getByRole("heading", { name: "Programs" });
     this.subtitle = page.getByText("Manage academic programs and semesters");
     this.newProgramButton = page.getByRole("button", { name: "+ New Program" });
-    this.createProgramButton = page.getByRole("button", { name: "Create Program" });
+    this.createProgramButton = page.getByRole("button", { name: "Create NewProgram" });
     this.programColumnHeader = page.getByRole("columnheader", { name: "Program" });
     this.table = page.getByRole("table");
     this.selectProgramHint = page.getByText("Select a program to manage semesters");
