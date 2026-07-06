@@ -24,13 +24,13 @@ Guardrails:
 
 ## Skills (read before writing)
 
-Project skills live under `.agents/skills/`:
+Project skills live under `.cursor/skills/`:
 
 | Skill | Path | When |
 |-------|------|------|
-| `jira-ticket-analyzer` | `.agents/skills/jira-ticket-analyzer/SKILL.md` | Input is a Jira ticket or `features/*.feature.md` plan |
-| `pom-conventions` | `.agents/skills/pom-conventions/SKILL.md` | Always — locators and POM usage |
-| `api-cleanup` | `.agents/skills/api-cleanup/SKILL.md` | Any test that creates programs |
+| `jira-ticket-analyzer` | `.cursor/skills/jira-ticket-analyzer/SKILL.md` | Input is a Jira ticket or `features/*.feature.md` plan |
+| `pom-conventions` | `.cursor/skills/pom-conventions/SKILL.md` | Always — locators and POM usage |
+| `api-cleanup` | `.cursor/skills/api-cleanup/SKILL.md` | Any test that creates programs |
 
 ## Project layout
 

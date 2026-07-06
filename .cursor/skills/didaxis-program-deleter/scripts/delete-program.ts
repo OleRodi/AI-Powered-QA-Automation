@@ -67,7 +67,7 @@ function parseArgs(argv: string[]): CliOptions {
 
 function printUsage(): void {
   console.log(`Usage:
-  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-programs.ts [options]
+  npx tsx .cursor/skills/didaxis-program-deleter/scripts/delete-programs.ts [options]
 
 Options:
   --test-only        Delete only OleRodi-prefixed Playwright test programs (default)
@@ -76,10 +76,10 @@ Options:
   --dry-run          Print targets without calling DELETE
 
 Examples:
-  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts
-  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --test-only --dry-run
-  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --all
-  npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --id 3eb19aa5-6901-42ce-b510-0a8abcba513f`);
+  npx tsx .cursor/skills/didaxis-program-deleter/scripts/delete-program.ts
+  npx tsx .cursor/skills/didaxis-program-deleter/scripts/delete-program.ts --test-only --dry-run
+  npx tsx .cursor/skills/didaxis-program-deleter/scripts/delete-program.ts --all
+  npx tsx .cursor/skills/didaxis-program-deleter/scripts/delete-program.ts --id 3eb19aa5-6901-42ce-b510-0a8abcba513f`);
 }
 
 function printResults(results: Awaited<ReturnType<typeof deleteProgramsByIds>>): void {

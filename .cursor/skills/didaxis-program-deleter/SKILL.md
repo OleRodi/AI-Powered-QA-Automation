@@ -21,25 +21,25 @@ You are the Didaxis program cleanup specialist for the QA automation project.
 Delete Playwright test programs only (default — OleRodi prefix):
 
 ```bash
-npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts
+npx tsx .cursor/skills/didaxis-program-deleter/scripts/delete-program.ts
 ```
 
 Preview test targets without deleting:
 
 ```bash
-npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --test-only --dry-run
+npx tsx .cursor/skills/didaxis-program-deleter/scripts/delete-program.ts --test-only --dry-run
 ```
 
 Delete all programs (GET all IDs, then DELETE each):
 
 ```bash
-npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --all
+npx tsx .cursor/skills/didaxis-program-deleter/scripts/delete-program.ts --all
 ```
 
 Delete specific program UUID(s) only:
 
 ```bash
-npx tsx .agents/skills/didaxis-program-deleter/scripts/delete-program.ts --id <PROGRAM_UUID>
+npx tsx .cursor/skills/didaxis-program-deleter/scripts/delete-program.ts --id <PROGRAM_UUID>
 ```
 
 ## Playwright integration
