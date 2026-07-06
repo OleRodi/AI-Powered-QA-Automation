@@ -20,7 +20,7 @@ export default defineConfig({
 
   use: {
     baseURL: process.env.DIDAXIS_URL,
-    trace: 'on',
+    trace: 'on-first-retry',
     headless: !!process.env.CI,
     launchOptions: {
       slowMo: process.env.CI ? 0 : 1000,

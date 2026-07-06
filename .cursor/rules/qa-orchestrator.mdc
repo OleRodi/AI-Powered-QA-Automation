@@ -37,6 +37,7 @@ alwaysApply: false
 - `explore-and-generate` — ticket-less discovery: map coverage gaps, crawl UI, output one Gherkin plan per run (read-only; no spec writes in the skill itself)
 - `pom-conventions` — hand off to `test-writer` with POM expectations
 - `api-cleanup` — every spec that creates programs must use `cleanup.fixture`
+- `self-heal` — repair a **drifted locator** after triage classifies a red run as a test issue; re-discover via the Playwright MCP, patch the POM, prove green with assertions unchanged. **Never** for a real app bug.
 
 ## Routing
 
@@ -45,9 +46,10 @@ alwaysApply: false
 - **Ticket given** → read `playwright-conventions.mdc` → analyze (`jira-ticket-analyzer`) → produce test plan → save to `features/{ticket_number}`
 - **Plan ready** → delegate to `test-writer` (ref: `playwright-conventions.mdc`, `pom-conventions`)
 - **Spec returned** → run: `npx playwright test`
-- **Run is red** → delegate to `triage`
+- **Run is red** → delegate to `triage` (see **Heal on red**)
 - **Real app bug** → delegate to `bug-reporter`
-- **Test issue** → delegate to `test-writer` (propose fix, human OKs)
+- **Test issue — locator drift** → apply `self-heal` (patch POM, prove green, repair PR)
+- **Test issue — other** → delegate to `test-writer` (propose fix, human OKs)
 
 ### Ticket-less discovery
 
@@ -87,6 +89,21 @@ ORDER BY key ASC
 | Skip | Tickets already labeled `tests-generated` are excluded from the queue |
 
 **Budget:** at most **5 tickets** per backlog run.
+
+## Heal on red
+
+On a **red run**, delegate to `triage` to classify the failure — never patch before it's classified.
+
+- **Drift (test issue)** → apply `self-heal`:
+  1. Re-discover the element via the **Playwright MCP** (role + current accessible name).
+  2. Patch the **POM** with a minimal role-based locator diff — never touch the spec's assertions.
+  3. Re-run to **prove green with assertions unchanged**. Green via a weakened/removed assertion is not a heal — stop and escalate.
+  4. Open a **repair PR** linked to the failing run (old → new locator diff + green run evidence).
+- **Real app bug** → delegate to `bug-reporter` to file and link it. **Never heal a bug** — do not patch a locator or test to hide a real defect.
+
+**Budget:** at most **5 heals per run**. Stop and escalate if a heal won't prove green, or if triage can't classify.
+
+**Hard stops:** never heal an assertion (delete/weaken/comment out), and never merge a repair without a human.
 
 ## Done
 
