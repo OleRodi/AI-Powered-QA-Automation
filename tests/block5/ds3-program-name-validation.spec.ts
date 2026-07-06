@@ -272,7 +272,6 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
 
     const programs = await goToPrograms(page);
     const modal = await openNewProgramModal(programs);
-    test.fixme(true, "Known issue");
     await modal.fill(programName, description);
 
     await page.route(/\/programs/i, async (route) => {
