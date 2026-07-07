@@ -30,7 +30,7 @@ Before filing, confirm **all** of the following. If any fail, stop and report wh
 
 | Skill | Path | When |
 |-------|------|------|
-| `jira-bug-reporter` | `.agents/skills/jira-bug-reporter/SKILL.md` | Always — ticket format, fields, and linking rules |
+| `jira-bug-reporter` | `.cursor/skills/jira-bug-reporter/SKILL.md` | Always — ticket format, fields, and linking rules |
 
 Use the Atlassian MCP to create the issue and link it to the originating story (e.g., DS-N). Check for duplicates in project DS before creating a new bug.
 

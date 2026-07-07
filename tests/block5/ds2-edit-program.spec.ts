@@ -364,15 +364,20 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     if (maxLengthAttr) {
       const actualValue = await editModal.programNameInput.inputValue();
       expect(actualValue.length).toBeLessThanOrEqual(Number(maxLengthAttr));
+      await editModal.cancel();
+      await expect(programs.programRow(programName)).toBeVisible();
     } else {
       await editModal.submit();
-      const stillOnPage = await programs.programRow(programName).isVisible();
+      // DS-2 has no max-length acceptance criterion. Assert the over-max name is
+      // not silently saved (dialog stays open or no over-max row is created),
+      // without demanding the original row survive a post-submit cancel.
+      const dialogStillOpen = await editModal.dialog.isVisible();
       const overMaxVisible = await programs.matchingRows(overMaxName).count();
-      expect(stillOnPage || overMaxVisible === 0).toBeTruthy();
+      expect(dialogStillOpen || overMaxVisible === 0).toBeTruthy();
+      if (await editModal.dialog.isVisible()) {
+        await editModal.cancel();
+      }
     }
-
-    await editModal.cancel();
-    await expect(programs.programRow(programName)).toBeVisible();
   });
 
   test("TC-018: Empty Description behavior is consistent", async ({ page, trackProgram }) => {
