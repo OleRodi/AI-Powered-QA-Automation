@@ -29,7 +29,7 @@ async function clickDeleteAndHandleDialog(
 }
 
 test.describe("Delete Program – Positive Flows", () => {
-  test("TC-001: Confirmation dialog appears before program deletion", async ({ page, trackProgram }) => {
+  test("TC-001: Confirmation dialog appears before program deletion", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -47,7 +47,7 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-002: Program is removed from list after deletion is confirmed", async ({ page, trackProgram }) => {
+  test("TC-002: Program is removed from list after deletion is confirmed", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -63,7 +63,7 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(programs.matchingRows(programName)).toHaveCount(0);
   });
 
-  test("TC-003: Program remains in list when deletion is canceled", async ({ page, trackProgram }) => {
+  test("TC-003: Program remains in list when deletion is canceled", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -75,7 +75,7 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-004: Confirmation dialog closes without side effects when dismissed via close control", async ({ page, trackProgram }) => {
+  test("TC-004: Confirmation dialog closes without side effects when dismissed via close control", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -87,7 +87,7 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-005: Delete icon is visible and functional for each program row", async ({ page, trackProgram }) => {
+  test("TC-005: Delete icon is visible and functional for each program row", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const testProgramName = `OleRodi Test Program ${suffix}`;
     const dataScienceName = `OleRodi Data Science 2026 ${suffix}`;
@@ -115,7 +115,7 @@ test.describe("Delete Program – Positive Flows", () => {
     await expect(dataScienceRow).toBeVisible();
   });
 
-  test("TC-006: Confirmation dialog shows the correct program name", async ({ page, trackProgram }) => {
+  test("TC-006: Confirmation dialog shows the correct program name", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const cloudProgramName = `OleRodi Cloud Engineering 2026 ${suffix}`;
 
@@ -134,7 +134,7 @@ test.describe("Delete Program – Positive Flows", () => {
 });
 
 test.describe("Delete Program – Negative Flows", () => {
-  test("TC-007: Program is not removed before user confirms", async ({ page, trackProgram }) => {
+  test("TC-007: Program is not removed before user confirms", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -158,7 +158,7 @@ test.describe("Delete Program – Negative Flows", () => {
     await page.unroute(/\/programs/i);
   });
 
-  test("TC-008: Backend failure does not remove program from list", async ({ page, trackProgram }) => {
+  test("TC-008: Backend failure does not remove program from list", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -184,7 +184,7 @@ test.describe("Delete Program – Negative Flows", () => {
     await page.unroute(/\/programs/i);
   });
 
-  test("TC-009: Unauthorized user cannot delete a program", async ({ page, trackProgram }) => {
+  test("TC-009: Unauthorized user cannot delete a program", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -210,7 +210,7 @@ test.describe("Delete Program – Negative Flows", () => {
     await page.unroute(/\/programs/i);
   });
 
-  test("TC-010: Rapid double-click on Confirm sends only one delete request", async ({ page, trackProgram }) => {
+  test("TC-010: Rapid double-click on Confirm sends only one delete request", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -240,7 +240,7 @@ test.describe("Delete Program – Negative Flows", () => {
     await page.unroute(/\/programs/i);
   });
 
-  test("TC-011: Deletion is blocked for program with dependent records", async ({ page, trackProgram }) => {
+  test("TC-011: Deletion is blocked for program with dependent records", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -271,7 +271,7 @@ test.describe("Delete Program – Negative Flows", () => {
 });
 
 test.describe("Delete Program – Edge Cases", () => {
-  test("TC-012: Deleting the last remaining program triggers the empty state", async ({ page, trackProgram }) => {
+  test("TC-012: Deleting the last remaining program triggers the empty state", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
     const programId = `mock-id-${suffix}`;
@@ -331,7 +331,7 @@ test.describe("Delete Program – Edge Cases", () => {
     await page.unroute(/\/api\/programs/i);
   });
 
-  test("TC-013: Multiple sequential deletions are reflected immediately", async ({ page, trackProgram }) => {
+  test("TC-013: Multiple sequential deletions are reflected immediately", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const testProgramName = `OleRodi Test Program ${suffix}`;
     const dataScienceName = `OleRodi Data Science 2026 ${suffix}`;
@@ -355,7 +355,7 @@ test.describe("Delete Program – Edge Cases", () => {
     await expect(programs.programRow(cloudProgramName)).toBeVisible();
   });
 
-  test("TC-014: List count and pagination adjust after deletion", async ({ page, trackProgram }) => {
+  test("TC-014: List count and pagination adjust after deletion", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     test.setTimeout(120000);
 
     const suffix = Date.now();
@@ -391,7 +391,7 @@ test.describe("Delete Program – Edge Cases", () => {
     await expect(batchRows).toHaveCount(batchSize - 1);
   });
 
-  test("TC-015: Deletion persists after page reload", async ({ page, trackProgram }) => {
+  test("TC-015: Deletion persists after page reload", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -411,7 +411,7 @@ test.describe("Delete Program – Edge Cases", () => {
     await expect(programs.matchingRows(programName)).toHaveCount(0);
   });
 
-  test("TC-016: Undo/recovery availability documented", async ({ page, trackProgram }) => {
+  test("TC-016: Undo/recovery availability documented", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 
@@ -431,7 +431,7 @@ test.describe("Delete Program – Edge Cases", () => {
     await expect(programs.undoButton).toHaveCount(0);
   });
 
-  test("TC-017: Special-character program names are handled correctly in dialog and deletion", async ({ page, trackProgram }) => {
+  test("TC-017: Special-character program names are handled correctly in dialog and deletion", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Informatique & IA - Niveau 2 ${suffix}`;
 
@@ -453,7 +453,7 @@ test.describe("Delete Program – Edge Cases", () => {
     expect(dialogMessage).not.toContain("&amp;");
   });
 
-  test("TC-018: Correct record is deleted when similar names exist", async ({ page, trackProgram }) => {
+  test("TC-018: Correct record is deleted when similar names exist", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const baseName = `OleRodi Test Program ${suffix}`;
     const extendedName = `OleRodi Test Program 2 ${suffix}`;
@@ -473,7 +473,7 @@ test.describe("Delete Program – Edge Cases", () => {
     await expect(programs.programRow(baseName)).toBeVisible();
   });
 
-  test("TC-019: Keyboard interaction supports safe confirmation flow", async ({ page, trackProgram }) => {
+  test("TC-019: Keyboard interaction supports safe confirmation flow", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
 

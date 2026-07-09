@@ -27,6 +27,9 @@ Thumbs.db
 # Playwright MCP
 .playwright-mcp/
 
+# Downloaded CI run artifacts
+gha-run-artifacts/
+
 # Env
 .env
 .env.local

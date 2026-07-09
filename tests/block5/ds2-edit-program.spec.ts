@@ -11,7 +11,7 @@ import { ProgramsPage } from "../../pages/programs.page";
 const PROGRAM_NAME = "OleRodi Web Development 2026";
 
 test.describe("Programs – Edit existing program details (DS-2)", () => {
-  test("TC-001: Edit form opens with existing program data pre-populated", async ({ page, trackProgram }) => {
+  test("TC-001: Edit form opens with existing program data pre-populated", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const programDesc = "TC-001 baseline description";
@@ -25,7 +25,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(editModal.descriptionInput).toHaveValue(programDesc);
   });
 
-  test("TC-002: Edit form pre-populates every visible field with current data", async ({ page, trackProgram }) => {
+  test("TC-002: Edit form pre-populates every visible field with current data", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const programDesc = "TC-002 full field baseline";
@@ -57,7 +57,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     }
   });
 
-  test("TC-003: Edit icon is visible per row and opens the correct program", async ({ page, trackProgram }) => {
+  test("TC-003: Edit icon is visible per row and opens the correct program", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const firstName = `${PROGRAM_NAME} A ${suffix}`;
     const secondName = `${PROGRAM_NAME} B ${suffix}`;
@@ -75,7 +75,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(editModal.programNameInput).not.toHaveValue(firstName);
   });
 
-  test("TC-004: Saving a valid updated Name closes modal and refreshes list immediately", async ({ page, trackProgram }) => {
+  test("TC-004: Saving a valid updated Name closes modal and refreshes list immediately", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const originalName = `${PROGRAM_NAME} ${suffix}`;
     const updatedName = `${PROGRAM_NAME} ${suffix} - Updated`;
@@ -94,7 +94,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     ).toHaveCount(0);
   });
 
-  test("TC-005: List update after save occurs within 2 seconds", async ({ page, trackProgram }) => {
+  test("TC-005: List update after save occurs within 2 seconds", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const originalName = `${PROGRAM_NAME} ${suffix}`;
     const timedName = `${PROGRAM_NAME} ${suffix} - Timed`;
@@ -115,7 +115,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     expect(Date.now() - start).toBeLessThan(2000);
   });
 
-  test("TC-006: Updating only Description preserves all other field values", async ({ page, trackProgram }) => {
+  test("TC-006: Updating only Description preserves all other field values", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const originalDesc = "TC-006 baseline description";
@@ -138,7 +138,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(editModal.programNameInput).toHaveValue(programName);
   });
 
-  test("TC-007: Editing multiple fields simultaneously saves all changes correctly", async ({ page, trackProgram }) => {
+  test("TC-007: Editing multiple fields simultaneously saves all changes correctly", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const originalName = `${PROGRAM_NAME} ${suffix}`;
     const updatedName = `${PROGRAM_NAME} ${suffix} - Multi`;
@@ -159,7 +159,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(reopened.descriptionInput).toHaveValue(updatedDesc);
   });
 
-  test("TC-008: Description change persists through browser reload", async ({ page, trackProgram }) => {
+  test("TC-008: Description change persists through browser reload", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const persistedDesc = "Verified persistence of description field";
@@ -178,7 +178,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(reopened.descriptionInput).toHaveValue(persistedDesc);
   });
 
-  test("TC-009: All persisted updates remain correct after page reload", async ({ page, trackProgram }) => {
+  test("TC-009: All persisted updates remain correct after page reload", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const originalName = `${PROGRAM_NAME} ${suffix}`;
     const updatedName = `${PROGRAM_NAME} ${suffix} - Updated`;
@@ -202,7 +202,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(reopened.descriptionInput).toHaveValue(updatedDesc);
   });
 
-  test("TC-010: Save is blocked when Name is empty", async ({ page, trackProgram }) => {
+  test("TC-010: Save is blocked when Name is empty", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -221,7 +221,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-011: Save is blocked when Name contains only whitespace", async ({ page, trackProgram }) => {
+  test("TC-011: Save is blocked when Name contains only whitespace", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -239,7 +239,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-012: Duplicate program name is rejected", async ({ page, trackProgram }) => {
+  test("TC-012: Duplicate program name is rejected", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const targetName = `${PROGRAM_NAME} ${suffix}`;
     const duplicateName = `OleRodi Data Science ${suffix}`;
@@ -257,7 +257,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(programs.matchingRows(duplicateName)).toHaveCount(1);
   });
 
-  test("TC-013: Backend failure does not close modal or corrupt list", async ({ page, trackProgram }) => {
+  test("TC-013: Backend failure does not close modal or corrupt list", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const originalDesc = "TC-013 baseline description";
@@ -293,7 +293,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(reopened.descriptionInput).toHaveValue(originalDesc);
   });
 
-  test("TC-014: Cancel action discards all unsaved changes", async ({ page, trackProgram }) => {
+  test("TC-014: Cancel action discards all unsaved changes", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const originalDesc = "TC-014 baseline description";
@@ -316,7 +316,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(reopened.descriptionInput).toHaveValue(originalDesc);
   });
 
-  test("TC-015: Name accepts valid special characters and saves correctly", async ({ page, trackProgram }) => {
+  test("TC-015: Name accepts valid special characters and saves correctly", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const specialName = `OleRodi Web Development 2026: Front-End & API (Evening) ${suffix}`;
@@ -332,7 +332,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(programs.programRow(specialName)).toBeVisible();
   });
 
-  test("TC-016: Name at maximum allowed length is accepted", async ({ page, trackProgram }) => {
+  test("TC-016: Name at maximum allowed length is accepted", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const maxLengthName = `OleRodi ${"A".repeat(100)}${suffix}`;
@@ -348,7 +348,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(programs.programRow(maxLengthName)).toBeVisible();
   });
 
-  test("TC-017: Name exceeding maximum length is prevented or rejected", async ({ page, trackProgram }) => {
+  test("TC-017: Name exceeding maximum length is prevented or rejected", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const overMaxName = `OleRodi ${"B".repeat(101)}${suffix}`;
@@ -380,7 +380,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     }
   });
 
-  test("TC-018: Empty Description behavior is consistent", async ({ page, trackProgram }) => {
+  test("TC-018: Empty Description behavior is consistent", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -402,7 +402,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     }
   });
 
-  test("TC-019: Unchanged Save does not alter any data", async ({ page, trackProgram }) => {
+  test("TC-019: Unchanged Save does not alter any data", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const programDesc = "TC-019 unchanged baseline";
@@ -420,7 +420,7 @@ test.describe("Programs – Edit existing program details (DS-2)", () => {
     await expect(programs.matchingRows(programName)).toHaveCount(1);
   });
 
-  test("TC-020: Concurrent edit conflict is handled safely", async ({ browser, trackProgram }) => {
+  test("TC-020: Concurrent edit conflict is handled safely", { tag: "@regression" }, async ({ browser, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const sessionAName = `OleRodi Concurrent A ${suffix}`;

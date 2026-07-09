@@ -3,7 +3,7 @@ import { createProgram } from "../../support/playwright-program-helpers";
 import { goToPrograms, uniqueId } from "../../support/programs-test.helpers";
 
 test.describe("Programs – Semester panel selection (discovered)", () => {
-  test("TC-001: Selecting a program reveals the semester panel", async ({
+  test("TC-001: Selecting a program reveals the semester panel", { tag: "@sanity" }, async ({
     page,
     trackProgram,
   }) => {
@@ -23,7 +23,7 @@ test.describe("Programs – Semester panel selection (discovered)", () => {
     await expect(programs.semesterPanelHeading(programName)).toBeVisible();
   });
 
-  test("TC-002: Switching selection updates the semester panel", async ({
+  test("TC-002: Switching selection updates the semester panel", { tag: "@regression" }, async ({
     page,
     trackProgram,
   }) => {

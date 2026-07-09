@@ -5,7 +5,7 @@ import { goToPrograms } from "../../support/programs-test.helpers";
 
 test.describe("DS-DASH — Dashboard navigation smoke", () => {
   test.describe("Dashboard content", () => {
-    test("TC-001: Dashboard loads with expected content for authenticated user", async ({
+    test("TC-001: Dashboard loads with expected content for authenticated user", { tag: "@e2e" }, async ({
       page,
     }) => {
       const dashboard = new DashboardPage(page);
@@ -19,7 +19,7 @@ test.describe("DS-DASH — Dashboard navigation smoke", () => {
   });
 
   test.describe("Sidebar navigation", () => {
-    test("TC-002: Sidebar navigates to Programs page", async ({ page }) => {
+    test("TC-002: Sidebar navigates to Programs page", { tag: "@api" }, async ({ page }) => {
       const dashboard = new DashboardPage(page);
       await dashboard.goto();
 
@@ -30,7 +30,7 @@ test.describe("DS-DASH — Dashboard navigation smoke", () => {
       await expect(programs.newProgramButton).toBeVisible();
     });
 
-    test("TC-003: Sidebar navigates back to Dashboard from Programs", async ({ page }) => {
+    test("TC-003: Sidebar navigates back to Dashboard from Programs", { tag: "@sanity" }, async ({ page }) => {
       const programs = await goToPrograms(page);
 
       await programs.nav.goToDashboard();
@@ -41,7 +41,7 @@ test.describe("DS-DASH — Dashboard navigation smoke", () => {
   });
 
   test.describe("Quick Start navigation", () => {
-    test("TC-004: Quick Start programs card navigates to Programs", async ({ page }) => {
+    test("TC-004: Quick Start programs card navigates to Programs", { tag: "@e2e" }, async ({ page }) => {
       const dashboard = new DashboardPage(page);
       await dashboard.goto();
 
