@@ -105,8 +105,12 @@ On a **red run**, delegate to `triage` to classify the failure — never patch b
 
 **Hard stops:** never heal an assertion (delete/weaken/comment out), and never merge a repair without a human.
 
+## Reliability eval (mandatory)
+
+Before declaring **Done**, update [`evals/eval-report.md`](../../evals/eval-report.md): refresh flake rate, heal success rate (masked-regression count **must be 0**), generation-gate pass rate, and ask-vs-guess. State how each number was measured (CI logs, PR history, session review). If the masked-regression count is not 0, stop and escalate — do not close the task.
+
 ## Done
 
-**Single task:** the suite is green for the ticket, or a bug is filed and linked (human approved).
+**Single task:** the suite is green for the ticket, or a bug is filed and linked (human approved) — **and** the reliability eval is updated.
 
-**Backlog run:** each processed ticket has a green spec run and an open PR with `tests-generated` on the ticket, or is skipped/stopped per Loop guard with a comment on the ticket. Merges and closes remain human actions.
+**Backlog run:** each processed ticket has a green spec run and an open PR with `tests-generated` on the ticket, or is skipped/stopped per Loop guard with a comment on the ticket; the reliability eval (`evals/eval-report.md`) is refreshed for the run. Merges and closes remain human actions.

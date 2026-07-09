@@ -16,6 +16,7 @@ Hard stops for every task. Details: `.cursor/rules/playwright-conventions.mdc`.
 | `storageState` auth | Setup project + saved state. No UI login in every test. |
 | Unique self-cleaning data | Unique names/ids; track + delete via API/`api-cleanup`. |
 | One tag per test | Tag the `test(...)`, not the `describe`. |
+| Reliability eval | Update `evals/eval-report.md` before closing a backlog run or release. Masked-regression count MUST be 0. |
 
 ## SHOULD
 
@@ -37,8 +38,30 @@ Hard stops for every task. Details: `.cursor/rules/playwright-conventions.mdc`.
 | Healing a real bug | Triage → `bug-reporter`. `self-heal` only for selector drift. |
 | Tags on `describe` | Tag individual tests only. |
 
+## Agent governance
+
+Behavioral (not hook-enforced). **Audit, then edit.** Every non-trivial task emits a **Proposal** block *before* touching files:
+
+```
+Proposal
+- Scope: <files/dirs and what changes>
+- Confidence: <1-10>
+- Rationale: <why this approach>
+- Unknowns: <missing inputs / assumptions>
+```
+
+Confidence gate:
+
+| Confidence | Action |
+|------------|--------|
+| **< 5** | Do **not** proceed. Ask for the missing input. |
+| **5–7** | Proceed only with explicit Unknowns listed **and** human approval. |
+| **≥ 8** | Proceed. |
+
+Never invent a **path, enum, env var, credential, or message** — ask or explore (read the repo, `explore-and-generate`) instead.
+
 ## Index
 
-**Skills** (`.cursor/skills/`): `api-cleanup` · `pom-conventions` · `jira-ticket-analyzer` · `explore-and-generate` · `ci-failure-triage` · `self-heal` · `jira-bug-reporter` · `didaxis-program-deleter`
+**Skills** (`.cursor/skills/`): `api-cleanup` · `pom-conventions` · `jira-ticket-analyzer` · `explore-and-generate` · `exploratory-charter` · `ci-failure-triage` · `self-heal` · `jira-bug-reporter` · `didaxis-program-deleter`
 
 **Agents** (`.cursor/agents/`): `test-writer` · `triage` · `bug-reporter` · (+ rule `qa-orchestrator`)
