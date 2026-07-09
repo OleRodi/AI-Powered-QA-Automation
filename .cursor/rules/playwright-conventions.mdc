@@ -14,6 +14,8 @@ alwaysApply: false
 ## Accessibility axe scan (wcag2a/aa) on key pages + a keyboard-nav check
 ## Assertions web-first; soft for multi-check; visual where it earns it
 ## Anti-flake CI-only retries; isolation; page.clock; pinned locale/timezone
+## Tagging exactly one tag per test; @destructive only for shared/global-state mutation (serial); revert hook on any state-mutating test
+## Test data Faker factories for happy-path; curated invalids in static .ts; secrets/URLs from env; repeated paths/messages from enums
 ## Refusals (hard stops) never weaken/delete an assertion, heal a real bug, swap role locators for CSS/XPath, waitForTimeout, hardcode a credential, or use `any`
 
 Each rule below shows the standard, then a ✅ good and ❌ bad example. When in doubt, prefer the example a *user* (or a screen reader) would recognize over the one coupled to markup.
@@ -323,7 +325,133 @@ export default defineConfig({
 
 **Why:** retries buy a green build, not a fixed one — a test that only passes on retry is a bug with a snooze button; track those. Pinned locale/timezone and `page.clock` remove whole classes of time-dependent flake. Cranking `workers: 1` to stop collisions hides the real problem: tests that aren't isolated.
 
-## 11. Refusals — hard stops, not preferences
+## 11. Tagging — exactly one tag per test
+
+Tag every `test(...)` with **exactly one** tag, on the test (never on `describe` — see the constitution). Pick the single most specific tag from this set:
+
+| Tag | Use for |
+|-----|---------|
+| `@smoke` | Critical happy path; must pass on every push. |
+| `@sanity` | Quick shallow check of a feature after a change. |
+| `@regression` | Full-depth coverage; the broad default for most specs. |
+| `@api` | Pure API/contract test (`request` fixture, no UI). |
+| `@e2e` | Multi-page user journey across several features. |
+| `@destructive` | **Only** tests that mutate shared/global state and must run serially. |
+
+**`@destructive` is narrow.** It is *only* for tests that change state shared across tests — locale, roles/permissions, feature flags, global settings — and therefore must run with `--workers=1`. A test that creates and then deletes **its own** data is *not* destructive; it keeps its importance tag (`@smoke`/`@sanity`/`@regression`).
+
+**Any state-mutating test needs a revert hook.** If a test changes state — even its own data — it must restore it in `test.afterEach`/`test.afterAll` (or via the cleanup fixture). `@destructive` tests additionally revert the shared state they touched and run serially.
+
+✅ **Good**
+
+```tsx
+// Own-data mutation → importance tag + self-cleanup
+test('creates a program', { tag: '@regression' }, async ({ page }) => {
+  const program = makeProgram();
+  await form.createProgram(program.name);
+  await expect(list.row(program.name)).toBeVisible();
+});
+test.afterEach(async ({ request }) => {
+  await cleanupProgramsByPrefix(request, TEST_PROGRAM_OWNER);   // revert own data
+});
+
+// Shared/global-state mutation → @destructive + serial + revert
+test.describe.configure({ mode: 'serial' });
+test('switching workspace locale to fr-CA translates the nav', { tag: '@destructive' }, async ({ page }) => {
+  await settings.setLocale('fr-CA');
+  await expect(page.getByRole('link', { name: 'Programmes' })).toBeVisible();
+});
+test.afterAll(async ({ request }) => {
+  await settings.resetLocale(request, 'en-CA');                 // revert shared state
+});
+```
+
+❌ **Bad**
+
+```tsx
+test.describe('Programs', () => {
+  // ❌ two tags, and tagged on describe
+  test('edits a program', { tag: ['@smoke', '@regression'] }, async () => { /* ... */ });
+
+  // ❌ mutates a global feature flag with no revert hook and no @destructive/serial
+  test('enables beta dashboard', { tag: '@regression' }, async ({ page }) => {
+    await settings.toggleFlag('beta-dashboard', true);          // leaks into every later test
+  });
+});
+```
+
+Run a slice with the npm scripts (`test:smoke`, `test:sanity`, `test:regression`, `test:api`, `test:e2e`, `test:destructive`) or directly:
+
+```bash
+npx playwright test --grep @smoke
+npx playwright test --grep @destructive --workers=1
+```
+
+**Why:** one tag per test keeps the grep slices disjoint and the suite honestly categorized. Reserving `@destructive` for genuine shared-state mutation lets everything else stay `fullyParallel`; the revert hook keeps a mutating test from poisoning the run.
+
+## 12. Test data — factories for the happy path, static sets for invalids
+
+Where data lives is a decision, not an accident:
+
+| Kind | Home | Why |
+|------|------|-----|
+| Happy-path data | Faker factory under `test-data/factories/` | Unique, varied, one builder per entity. |
+| Curated invalid sets | Static `.ts` under `test-data/invalid/` | Boundary/negative cases are fixed and reviewed, not random. |
+| Secrets & URLs | `process.env` | Never inline; see Auth + Refusals. |
+| Repeated paths / messages | `enum` (one source of truth) | No stringly-typed drift across specs. |
+
+Factories build **unique** data (so parallel runs never collide) and take overrides so a test can pin the one field it cares about. Invalid inputs are *curated*, not generated — a negative test asserts on a known boundary, so those values live in a static, reviewable file.
+
+✅ **Example factory**
+
+```ts
+// test-data/factories/program.factory.ts
+import { faker } from '@faker-js/faker';
+import { TEST_PROGRAM_OWNER } from '../../support/test-data.constants';
+
+export interface ProgramInput {
+  name: string;
+  description: string;
+}
+
+/**
+ * Build happy-path program data. Name is prefixed (for cleanup) and unique
+ * (Date.now) so parallel runs never collide. Pass overrides to pin a field.
+ */
+export function makeProgram(overrides: Partial<ProgramInput> = {}): ProgramInput {
+  return {
+    name: `${TEST_PROGRAM_OWNER}-${faker.commerce.department()}-${Date.now()}`,
+    description: faker.lorem.sentence(),
+    ...overrides,
+  };
+}
+```
+
+```ts
+// test-data/invalid/program-names.ts — curated, reviewed boundaries
+export const INVALID_PROGRAM_NAMES = [
+  { label: 'empty', value: '' },
+  { label: 'whitespace only', value: '   ' },
+  { label: 'too long (256)', value: 'x'.repeat(256) },
+] as const;
+
+// support enums — one source of truth for repeated strings
+export enum Route { Programs = '/programs', Login = '/login' }
+export enum Message { ProgramCreated = 'Program created', ProgramDeleted = 'Program deleted' }
+```
+
+❌ **Bad**
+
+```ts
+// hand-rolled literal, same name every run → collides in parallel / on re-run
+const program = { name: 'Web Development', description: 'desc' };
+await page.goto('http://test.didaxis.studio/programs');   // hardcoded URL, not process.env / enum
+await expect(page.getByText('Program created')).toBeVisible(); // stringly-typed, duplicated everywhere
+```
+
+**Why:** factories keep happy-path data unique and DRY while letting each test override only what it asserts on; curated static sets keep negative cases deliberate and reviewable; enums and `process.env` remove the copy-pasted strings and secrets that rot across a suite. (`@faker-js/faker` is a dev dependency — `npm i -D @faker-js/faker`.)
+
+## 13. Refusals — hard stops, not preferences
 
 These are non-negotiable. If a task requires any of the below, **refuse: stop, do not comply, and raise the conflict** so a human decides. Do not silently do it, and do not do it "just this once."
 

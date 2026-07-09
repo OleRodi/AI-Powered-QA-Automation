@@ -24,7 +24,7 @@ function mockProgram(
 }
 
 test.describe("Program List Display – Positive Flows", () => {
-  test("TC-001: Programs page displays all existing programs with name and description", async ({ page, trackProgram }) => {
+  test("TC-001: Programs page displays all existing programs with name and description", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const program1Name = `OleRodi Web Development 2026 ${suffix}`;
     const program1Desc = "Full-stack web technologies and project-based learning";
@@ -47,7 +47,7 @@ test.describe("Program List Display – Positive Flows", () => {
     await expect(row2).toContainText(program2Desc);
   });
 
-  test("TC-002: Each program row displays management action icons", async ({ page, trackProgram }) => {
+  test("TC-002: Each program row displays management action icons", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const program1Name = `OleRodi Web Development 2026 ${suffix}`;
     const program2Name = `OleRodi Data Science Foundations ${suffix}`;
@@ -65,7 +65,7 @@ test.describe("Program List Display – Positive Flows", () => {
     await editModal.cancel();
   });
 
-  test("TC-003: Empty-state message appears when no programs exist", async ({ page, trackProgram }) => {
+  test("TC-003: Empty-state message appears when no programs exist", { tag: "@regression" }, async ({ page, trackProgram }) => {
     await page.route(/\/api\/programs/i, async (route) => {
       if (route.request().method() === "GET") {
         await route.fulfill({
@@ -89,7 +89,7 @@ test.describe("Program List Display – Positive Flows", () => {
     await page.unroute(/\/api\/programs/i);
   });
 
-  test("TC-004: Empty-state CTA navigates to program creation form", async ({ page, trackProgram }) => {
+  test("TC-004: Empty-state CTA navigates to program creation form", { tag: "@regression" }, async ({ page, trackProgram }) => {
     await page.route(/\/api\/programs/i, async (route) => {
       if (route.request().method() === "GET") {
         await route.fulfill({
@@ -120,7 +120,7 @@ test.describe("Program List Display – Positive Flows", () => {
     await page.unroute(/\/api\/programs/i);
   });
 
-  test("TC-005: Programs are displayed in a consistent default sort order", async ({ page, trackProgram }) => {
+  test("TC-005: Programs are displayed in a consistent default sort order", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const names = [
       `OleRodi Alpha Program ${suffix}`,
@@ -156,7 +156,7 @@ test.describe("Program List Display – Positive Flows", () => {
     expect(orderAfter).toEqual(orderBefore);
   });
 
-  test("TC-006: Clicking a program row navigates to detail or edit view", async ({ page, trackProgram }) => {
+  test("TC-006: Clicking a program row navigates to detail or edit view", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Web Development 2026 ${suffix}`;
     const programDesc = "Full-stack web technologies and project-based learning";
@@ -173,7 +173,7 @@ test.describe("Program List Display – Positive Flows", () => {
 });
 
 test.describe("Program List Display – Negative Flows", () => {
-  test("TC-007: Non-admin user cannot access the program management list", async ({ page, trackProgram }) => {
+  test("TC-007: Non-admin user cannot access the program management list", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     await page.route(/\/api\/programs/i, async (route) => {
       if (route.request().method() === "GET") {
         await route.fulfill({
@@ -193,7 +193,7 @@ test.describe("Program List Display – Negative Flows", () => {
     await page.unroute(/\/api\/programs/i);
   });
 
-  test("TC-008: API failure shows error state, not empty-state message", async ({ page, trackProgram }) => {
+  test("TC-008: API failure shows error state, not empty-state message", { tag: "@regression" }, async ({ page, trackProgram }) => {
     await page.route(/\/api\/programs/i, async (route) => {
       if (route.request().method() === "GET") {
         await route.fulfill({
@@ -222,7 +222,7 @@ test.describe("Program List Display – Negative Flows", () => {
     await page.unroute(/\/api\/programs/i);
   });
 
-  test("TC-009: Program with missing name/description data renders gracefully", async ({ page, trackProgram }) => {
+  test("TC-009: Program with missing name/description data renders gracefully", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     await page.route(/\/api\/programs/i, async (route) => {
       if (route.request().method() === "GET") {
         await route.fulfill({
@@ -250,7 +250,7 @@ test.describe("Program List Display – Negative Flows", () => {
     await page.unroute(/\/api\/programs/i);
   });
 
-  test("TC-010: Loading state does not flash a false empty-state message", async ({ page, trackProgram }) => {
+  test("TC-010: Loading state does not flash a false empty-state message", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     await page.route(/\/api\/programs/i, async (route) => {
       if (route.request().method() === "GET") {
         await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -271,7 +271,7 @@ test.describe("Program List Display – Negative Flows", () => {
 });
 
 test.describe("Program List Display – Edge Cases", () => {
-  test("TC-011: Special characters in name and description display correctly", async ({ page, trackProgram }) => {
+  test("TC-011: Special characters in name and description display correctly", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Informatique & IA - Niveau 2 ${suffix}`;
     const programDesc = `Parcours avancé: IA, NLP, et MLOps ${suffix}`;
@@ -287,7 +287,7 @@ test.describe("Program List Display – Edge Cases", () => {
     await expect(row).not.toContainText("&eacute;");
   });
 
-  test("TC-012: Very long names and descriptions do not break layout", async ({ page, trackProgram }) => {
+  test("TC-012: Very long names and descriptions do not break layout", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const longName = `OleRodi Advanced Data Engineering and Distributed Systems - Cohort 2026 - Section A ${suffix}`;
     const longDesc = `Comprehensive curriculum covering distributed storage, stream processing, data modeling, observability, and production-grade pipelines for enterprise workloads ${suffix}`;
@@ -311,7 +311,7 @@ test.describe("Program List Display – Edge Cases", () => {
     expect(deleteBox!.width).toBeGreaterThan(0);
   });
 
-  test("TC-013: Large dataset loads and renders within acceptable time", async ({ page, trackProgram }) => {
+  test("TC-013: Large dataset loads and renders within acceptable time", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const mockPrograms = Array.from({ length: 100 }, (_, i) =>
       mockProgram(`perf-id-${i}`, `Perf Program ${i}`, `Performance test program ${i}`)
     );
@@ -338,7 +338,7 @@ test.describe("Program List Display – Edge Cases", () => {
     await page.unroute(/\/api\/programs/i);
   });
 
-  test("TC-014: Program count indicator is accurate and updates", async ({ page, trackProgram }) => {
+  test("TC-014: Program count indicator is accurate and updates", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Count Probe ${suffix}`;
 
@@ -367,7 +367,7 @@ test.describe("Program List Display – Edge Cases", () => {
     }
   });
 
-  test("TC-015: List data is fresh after navigation back to Programs page", async ({ page, trackProgram }) => {
+  test("TC-015: List data is fresh after navigation back to Programs page", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Freshness Test Program ${suffix}`;
 
@@ -381,7 +381,7 @@ test.describe("Program List Display – Edge Cases", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-016: Deleting the last program transitions to empty state", async ({ page, trackProgram }) => {
+  test("TC-016: Deleting the last program transitions to empty state", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
     const programId = `solo-id-${suffix}`;
@@ -426,7 +426,7 @@ test.describe("Program List Display – Edge Cases", () => {
     await page.unroute(/\/api\/programs/i);
   });
 
-  test("TC-017: Empty state and list state switch correctly after first program is created", async ({ page, trackProgram }) => {
+  test("TC-017: Empty state and list state switch correctly after first program is created", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Cloud Engineering 2026 ${suffix}`;
     const programDesc = "TC-017 empty-to-list transition test";
@@ -459,7 +459,7 @@ test.describe("Program List Display – Edge Cases", () => {
     await expect(programs.emptyStateMessage).toHaveCount(0);
   });
 
-  test("TC-018: Duplicate program names are distinguishable in display", async ({ page, trackProgram }) => {
+  test("TC-018: Duplicate program names are distinguishable in display", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Test Program ${suffix}`;
     const desc1 = "TC-018 first instance description";
@@ -480,7 +480,7 @@ test.describe("Program List Display – Edge Cases", () => {
     expect(row1Text.includes(desc2) || row2Text.includes(desc2)).toBe(true);
   });
 
-  test("TC-019: Page refresh shows data consistent with server", async ({ page, trackProgram }) => {
+  test("TC-019: Page refresh shows data consistent with server", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = Date.now();
     const programName = `OleRodi Refresh Check ${suffix}`;
 

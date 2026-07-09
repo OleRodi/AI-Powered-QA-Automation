@@ -6,7 +6,13 @@
   "scripts": {
     "test": "playwright test tests/block5",
     "test:ui": "playwright test tests/block5 --ui",
-    "test:archive": "playwright test archive"
+    "test:archive": "playwright test archive",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:sanity": "playwright test --grep @sanity",
+    "test:regression": "playwright test --grep @regression",
+    "test:api": "playwright test --grep @api",
+    "test:e2e": "playwright test --grep @e2e",
+    "test:destructive": "playwright test --grep @destructive --workers=1"
   },
   "repository": {
     "type": "git",

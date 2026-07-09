@@ -4,6 +4,17 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      suite:
+        description: Suite to run on demand
+        type: choice
+        default: regression
+        options:
+          - regression
+          - smoke
+          - sanity
+          - api
+          - e2e
 
 jobs:
   test:
@@ -32,13 +43,30 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run Playwright tests
-        run: npm test
+      # Trigger → suite:
+      #   pull_request     → smoke
+      #   push             → sanity
+      #   workflow_dispatch → regression (or the chosen input)
+      - name: Select test suite
+        id: suite
+        run: |
+          case "${{ github.event_name }}" in
+            pull_request)     suite=smoke ;;
+            push)             suite=sanity ;;
+            workflow_dispatch) suite="${{ inputs.suite }}" ;;
+            *)                suite=regression ;;
+          esac
+          echo "name=${suite}" >> "$GITHUB_OUTPUT"
+          echo "script=test:${suite}" >> "$GITHUB_OUTPUT"
+          echo "Selected suite: ${suite} (npm run test:${suite})"
+
+      - name: Run Playwright tests (${{ steps.suite.outputs.script }})
+        run: npm run ${{ steps.suite.outputs.script }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ steps.suite.outputs.name }}
           path: playwright-report/
           retention-days: 30

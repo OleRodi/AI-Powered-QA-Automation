@@ -1,0 +1,44 @@
+---
+description: Always-on Playwright constitution — hard MUST/SHOULD/WON'T plus skill/agent index. Keep short; details live in playwright-conventions and skills.
+alwaysApply: true
+---
+
+# Constitution
+
+Hard stops for every task. Details: `.cursor/rules/playwright-conventions.mdc`.
+
+## MUST
+
+| Rule | Meaning |
+|------|---------|
+| Role-based locators | `getByRole` → label/placeholder → text → `getByTestId`. No CSS/XPath in new code. |
+| Web-first assertions | `expect(locator).toBeVisible()` etc. Auto-wait; no manual sleeps. |
+| `storageState` auth | Setup project + saved state. No UI login in every test. |
+| Unique self-cleaning data | Unique names/ids; track + delete via API/`api-cleanup`. |
+| One tag per test | Tag the `test(...)`, not the `describe`. |
+
+## SHOULD
+
+| Rule | Meaning |
+|------|---------|
+| Faker factories | Build test data via factories, not hand-rolled literals. |
+| Enums for repeated strings | Shared labels, statuses, routes — one source of truth. |
+| JSDoc on action methods | Document POM actions (params, side effects, returns). |
+
+## WON'T
+
+| Never | Why |
+|-------|-----|
+| XPath | Brittle; fails a11y-first locator policy. |
+| `waitForTimeout` | Hides races; use web-first expects / event waits. |
+| Hardcoded secrets | Env / CI secrets only. |
+| `any` | Type the fixture, POM, and API shapes. |
+| Weakened assertions | Don't delete, soften, or skip to go green. |
+| Healing a real bug | Triage → `bug-reporter`. `self-heal` only for selector drift. |
+| Tags on `describe` | Tag individual tests only. |
+
+## Index
+
+**Skills** (`.cursor/skills/`): `api-cleanup` · `pom-conventions` · `jira-ticket-analyzer` · `explore-and-generate` · `ci-failure-triage` · `self-heal` · `jira-bug-reporter` · `didaxis-program-deleter`
+
+**Agents** (`.cursor/agents/`): `test-writer` · `triage` · `bug-reporter` · (+ rule `qa-orchestrator`)

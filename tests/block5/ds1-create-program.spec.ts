@@ -15,7 +15,7 @@ const PROGRAM_NAME = "OleRodi Web Development 2026";
 const PROGRAM_DESC = "Full-stack web development program";
 
 test.describe("Programs – Create new academic program (DS-1)", () => {
-  test("TC-001: Navigate to program creation form", async ({ page, trackProgram }) => {
+  test("TC-001: Navigate to program creation form", { tag: "@api" }, async ({ page, trackProgram }) => {
     const programs = await goToPrograms(page);
 
     const modal = await openNewProgramModal(programs);
@@ -24,7 +24,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(modal.descriptionInput).toBeVisible();
   });
 
-  test("TC-002: Successfully create a program", async ({ page, trackProgram }) => {
+  test("TC-002: Successfully create a program", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -38,7 +38,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-003: Created program persists after page reload", async ({ page, trackProgram }) => {
+  test("TC-003: Created program persists after page reload", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -50,7 +50,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-004: Program can be created with only Program Name when Description is optional", async ({ page, trackProgram }) => {
+  test("TC-004: Program can be created with only Program Name when Description is optional", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Data Science 2026 ${suffix}`;
 
@@ -64,7 +64,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-005: Modal closes within a reasonable time after successful Create", async ({ page, trackProgram }) => {
+  test("TC-005: Modal closes within a reasonable time after successful Create", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -81,7 +81,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-006: Validation prevents empty program name", async ({ page, trackProgram }) => {
+  test("TC-006: Validation prevents empty program name", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const programs = await goToPrograms(page);
 
     const modal = await openNewProgramModal(programs);
@@ -91,7 +91,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(modal.dialog).toBeVisible();
   });
 
-  test("TC-007: Create is blocked when Program Name contains only whitespace", async ({ page, trackProgram }) => {
+  test("TC-007: Create is blocked when Program Name contains only whitespace", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const programs = await goToPrograms(page);
 
     const modal = await openNewProgramModal(programs);
@@ -101,7 +101,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(modal.dialog).toBeVisible();
   });
 
-  test("TC-008: Duplicate program name is rejected", async ({ page, trackProgram }) => {
+  test("TC-008: Duplicate program name is rejected", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -117,7 +117,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(programs.matchingRows(programName)).toHaveCount(1);
   });
 
-  test("TC-009: Duplicate name error does not clear entered Description", async ({ page, trackProgram }) => {
+  test("TC-009: Duplicate name error does not clear entered Description", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const duplicateDesc = "Duplicate name attempt";
@@ -133,7 +133,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(modal.descriptionInput).toHaveValue(duplicateDesc);
   });
 
-  test("TC-010: Cancel discards unsaved program data", async ({ page, trackProgram }) => {
+  test("TC-010: Cancel discards unsaved program data", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -147,7 +147,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(programs.matchingRows(programName)).toHaveCount(0);
   });
 
-  test("TC-011: Backend failure keeps modal open and preserves entered values", async ({ page, trackProgram }) => {
+  test("TC-011: Backend failure keeps modal open and preserves entered values", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -179,7 +179,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await modal.cancel();
   });
 
-  test("TC-012: Program Name accepts valid special characters", async ({ page, trackProgram }) => {
+  test("TC-012: Program Name accepts valid special characters", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Web Development 2026: Front-End & API (Evening) ${suffix}`;
 
@@ -193,7 +193,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-013: Leading and trailing spaces in Program Name are trimmed on save", async ({ page, trackProgram }) => {
+  test("TC-013: Leading and trailing spaces in Program Name are trimmed on save", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const trimmedName = `${PROGRAM_NAME} ${suffix}`;
     const paddedName = `   ${trimmedName}   `;
@@ -212,7 +212,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await editModal.cancel();
   });
 
-  test("TC-014: Rapid double-click on Create does not create duplicate programs", async ({ page, trackProgram }) => {
+  test("TC-014: Rapid double-click on Create does not create duplicate programs", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -228,7 +228,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     // await expect(programs.matchingRows(programName)).toHaveCount(1);
   });
 
-  test("TC-015: Program list row matches the created program name exactly", async ({ page, trackProgram }) => {
+  test("TC-015: Program list row matches the created program name exactly", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
     const partialName = `OleRodi Web Development ${suffix}`;
@@ -248,7 +248,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(programs.programRow(partialName)).toBeVisible();
   });
 
-  test("TC-016: Program Name at maximum allowed length is accepted", async ({ page, trackProgram }) => {
+  test("TC-016: Program Name at maximum allowed length is accepted", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const base = `${PROGRAM_NAME} ${suffix} `;
 
@@ -271,7 +271,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await editModal.cancel();
   });
 
-  test("TC-017: Program Name exceeding maximum allowed length is rejected", async ({ page, trackProgram }) => {
+  test("TC-017: Program Name exceeding maximum allowed length is rejected", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const base = `${PROGRAM_NAME} ${suffix} `;
 
@@ -305,7 +305,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     }
   });
 
-  test("TC-018: Empty Description is allowed when Description is optional", async ({ page, trackProgram }) => {
+  test("TC-018: Empty Description is allowed when Description is optional", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 
@@ -323,7 +323,7 @@ test.describe("Programs – Create new academic program (DS-1)", () => {
     await expect(programs.programRow(programName)).toBeVisible();
   });
 
-  test("TC-019: Empty Description is blocked when Description is required", async ({ page, trackProgram }) => {
+  test("TC-019: Empty Description is blocked when Description is required", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `${PROGRAM_NAME} ${suffix}`;
 

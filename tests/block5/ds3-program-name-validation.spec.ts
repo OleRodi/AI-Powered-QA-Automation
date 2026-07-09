@@ -11,7 +11,7 @@ import {
 } from "../../support/programs-test.helpers";
 
 test.describe("Programs – DS-3 Program Name Validation – Positive Flows", () => {
-  test("TC-001: Program is created when name contains valid special characters", async ({ page, trackProgram }) => {
+  test("TC-001: Program is created when name contains valid special characters", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Informatique & IA - Niveau 2 ${suffix}`;
     const description = "TC-001 special characters test";
@@ -28,7 +28,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     await expect(editModal.programNameInput).toHaveValue(programName);
   });
 
-  test("TC-002: Newly created program appears in the Programs list", async ({ page, trackProgram }) => {
+  test("TC-002: Newly created program appears in the Programs list", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Informatique Liste ${suffix}`;
     const description = "TC-002 list verification test";
@@ -45,7 +45,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     await expect(programs.programNameText(programName)).toBeVisible();
   });
 
-  test("TC-003: Leading and trailing spaces are trimmed and stored value is the trimmed version", async ({ page, trackProgram }) => {
+  test("TC-003: Leading and trailing spaces are trimmed and stored value is the trimmed version", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const paddedName = `   OleRodi Cyber Security 2026 ${suffix}   `;
     const trimmedName = `OleRodi Cyber Security 2026 ${suffix}`;
@@ -65,7 +65,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     expect(storedValue).toBe(trimmedName);
   });
 
-  test("TC-004: Accented characters are accepted and preserved", async ({ page, trackProgram }) => {
+  test("TC-004: Accented characters are accepted and preserved", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Ingénierie Logicielle ${suffix}`;
     const description = "TC-004 accented characters test";
@@ -82,7 +82,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
     await expect(editModal.programNameInput).toHaveValue(programName);
   });
 
-  test("TC-005: Form fields are cleared after successful creation", async ({ page, trackProgram }) => {
+  test("TC-005: Form fields are cleared after successful creation", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Cloud Engineering 2026 ${suffix}`;
     const description = "TC-005 form reset test";
@@ -102,7 +102,7 @@ test.describe("Programs – DS-3 Program Name Validation – Positive Flows", ()
 });
 
 test.describe("Programs – DS-3 Program Name Validation – Negative Flows", () => {
-  test("TC-006: Form is blocked when Program Name contains only spaces", async ({ page, trackProgram }) => {
+  test("TC-006: Form is blocked when Program Name contains only spaces", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const programs = await goToPrograms(page);
     const modal = await openNewProgramModal(programs);
 
@@ -113,7 +113,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await expect(modal.dialog).toBeVisible();
   });
 
-  test("TC-007: Form is blocked when Program Name is empty", async ({ page, trackProgram }) => {
+  test("TC-007: Form is blocked when Program Name is empty", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const programs = await goToPrograms(page);
     const modal = await openNewProgramModal(programs);
 
@@ -125,7 +125,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await expect(modal.dialog).toBeVisible();
   });
 
-  test("TC-008: Form is blocked when Program Name contains only tabs and newlines", async ({ page, trackProgram }) => {
+  test("TC-008: Form is blocked when Program Name contains only tabs and newlines", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const programs = await goToPrograms(page);
     const modal = await openNewProgramModal(programs);
 
@@ -136,7 +136,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await expect(modal.dialog).toBeVisible();
   });
 
-  test("TC-009: Exact duplicate Program Name is rejected", async ({ page, trackProgram }) => {
+  test("TC-009: Exact duplicate Program Name is rejected", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Web Dev Dup ${suffix}`;
     const description = "TC-009 duplicate test";
@@ -158,7 +158,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await expect(programs.matchingRows(programName)).toHaveCount(1);
   });
 
-  test("TC-010: Duplicate with only leading/trailing spaces is rejected", async ({ page, trackProgram }) => {
+  test("TC-010: Duplicate with only leading/trailing spaces is rejected", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Trim Dup ${suffix}`;
     const paddedName = `  ${programName}  `;
@@ -181,7 +181,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await expect(programs.matchingRows(programName)).toHaveCount(1);
   });
 
-  test("TC-011: Duplicate detected after same-session creation without page refresh", async ({ page, trackProgram }) => {
+  test("TC-011: Duplicate detected after same-session creation without page refresh", { tag: "@sanity" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Cloud Same Session ${suffix}`;
     const description = "TC-011 same-session duplicate test";
@@ -203,7 +203,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     await expect(programs.matchingRows(programName)).toHaveCount(1);
   });
 
-  test("TC-012: Case-variant duplicate behavior is consistent", async ({ page, trackProgram }) => {
+  test("TC-012: Case-variant duplicate behavior is consistent", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const originalName = `OleRodi Case Variant Base ${suffix}`;
     const lowercaseName = `OleRodi case variant base ${suffix}`;
@@ -234,7 +234,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     }
   });
 
-  test("TC-013: XSS/injection string is safely handled", async ({ page, trackProgram }) => {
+  test("TC-013: XSS/injection string is safely handled", { tag: "@e2e" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const marker = `__xssExecuted_${suffix}`;
     const payload = `OleRodi <script>window.${marker}=true</script>`;
@@ -265,7 +265,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
     expect(alertSeen).toBe(false);
   });
 
-  test("TC-014: Create button is disabled during submission", async ({ page, trackProgram }) => {
+  test("TC-014: Create button is disabled during submission", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi Submit State ${suffix}`;
     const description = "TC-014 submission-state test";
@@ -313,7 +313,7 @@ test.describe("Programs – DS-3 Program Name Validation – Negative Flows", ()
 });
 
 test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => {
-  test("TC-015: Error messages appear in a consistent, visible location", async ({ page, trackProgram }) => {
+  test("TC-015: Error messages appear in a consistent, visible location", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const dupSeed = `OleRodi Error Loc Dup ${suffix}`;
     const description = "TC-015 error-location test";
@@ -339,7 +339,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     await expect(modal.duplicateNameError).toBeVisible();
   });
 
-  test("TC-016: Name at maximum allowed length is accepted", async ({ page, trackProgram }) => {
+  test("TC-016: Name at maximum allowed length is accepted", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const maxLength = 255;
     const base = `OleRodi MaxLen ${suffix} `;
@@ -361,7 +361,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     await editModal.cancel();
   });
 
-  test("TC-017: Name exceeding maximum length is rejected", async ({ page, trackProgram }) => {
+  test("TC-017: Name exceeding maximum length is rejected", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const base = `OleRodi OverMax ${suffix} `;
     const maxLength = 255;
@@ -383,7 +383,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     }
   });
 
-  test("TC-018: Valid punctuation does not trigger false validation errors", async ({ page, trackProgram }) => {
+  test("TC-018: Valid punctuation does not trigger false validation errors", { tag: "@api" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const programName = `OleRodi AI/ML: Foundations (2026) - Group A ${suffix}`;
     const description = "TC-018 punctuation test";
@@ -400,7 +400,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     await expect(editModal.programNameInput).toHaveValue(programName);
   });
 
-  test("TC-019: Validation error preserves other field values", async ({ page, trackProgram }) => {
+  test("TC-019: Validation error preserves other field values", { tag: "@smoke" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const correctedName = `OleRodi Business Analytics ${suffix}`;
     const description = "TC-019 field-preservation test";
@@ -426,7 +426,7 @@ test.describe("Programs – DS-3 Program Name Validation – Edge Cases", () => 
     await expect(programs.programRow(correctedName)).toBeVisible();
   });
 
-  test("TC-020: Internal multiple spaces behavior is consistent", async ({ page, trackProgram }) => {
+  test("TC-020: Internal multiple spaces behavior is consistent", { tag: "@regression" }, async ({ page, trackProgram }) => {
     const suffix = uniqueId();
     const canonical = `OleRodi Web Development 2026 ${suffix}`;
     const doubleSpaceVariant = `OleRodi Web  Development  2026 ${suffix}`;
